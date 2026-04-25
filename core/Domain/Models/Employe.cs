@@ -24,9 +24,9 @@ public partial class Employe
 
     public DateTime? DateModification { get; set; }
 
-    public virtual Locataire IdLocataireNavigation { get; set; } = null!;
+    public virtual Locataire? IdLocataireNavigation { get; set; } = null!;
 
     public virtual Utilisateur? IdUtilisateurNavigation { get; set; }
 
-    public virtual RefTypeContrat TypeContratNavigation { get; set; } = null!;
+    public virtual RefTypeContrat? TypeContratNavigation { get; set; } = null!;
 }
