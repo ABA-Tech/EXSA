@@ -84,5 +84,49 @@ namespace Infrastructure.Extensions
         {
             return locataireList.Select(x=>x.ToModel());
         }
+
+        public static Utilisateur ToModel(this UTILISATEUR entity)
+        {
+            return new Utilisateur
+            {
+                DateCreation = entity.DATE_CREATION,
+                DateModification = entity.DATE_MODIFICATION,
+                DerniereConnexion = entity.DERNIERE_CONNEXION,
+                Email = entity.EMAIL,
+                EstActif = entity.EST_ACTIF,
+                EstSupprime = entity.EST_SUPPRIME,
+                IdLocataire = entity.ID_LOCATAIRE,
+                IdUtilisateur = entity.ID_LOCATAIRE,
+                MotDePasseHash = entity.MOT_DE_PASSE_HASH,
+                NomComplet = entity.NOM_COMPLET,
+                Role = entity.ROLE,
+                Telephone = entity.TELEPHONE,
+                TokenFcm = entity.TOKEN_FCM
+            };
+        }
+
+        public static UTILISATEUR ToEntity(this Utilisateur utilisateur)
+        {
+            return new UTILISATEUR
+            {
+                TOKEN_FCM = utilisateur.TokenFcm,
+                DATE_CREATION = utilisateur.DateCreation,
+                DATE_MODIFICATION = utilisateur.DateModification,
+                DERNIERE_CONNEXION = utilisateur.DerniereConnexion,
+                EMAIL = utilisateur.Email,
+                EST_ACTIF = utilisateur.EstActif,
+                EST_SUPPRIME = utilisateur.EstSupprime,
+                ID_LOCATAIRE = utilisateur.IdLocataire,
+                //ID_UTILISATEUR = utilisateur.IdUtilisateur,
+                MOT_DE_PASSE_HASH = utilisateur.MotDePasseHash,
+                NOM_COMPLET = utilisateur.NomComplet,
+                ROLE = utilisateur.Role,
+                TELEPHONE = utilisateur.Telephone,
+            };
+        }
+        public static IEnumerable<Utilisateur> ToModelCollection(this IEnumerable<UTILISATEUR> utilisateurs)
+        {
+            return utilisateurs.Select(x => x.ToModel());
+        }
     }
 }

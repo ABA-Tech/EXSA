@@ -17,10 +17,16 @@ builder.Services.AddDbContext<ExsaDbContext>(options =>
 
 
 // Injection des dépendances de services
+builder.Services.AddScoped<IGenericService<Locataire>, LocataireService>();
 builder.Services.AddScoped<IGenericService<Employe>, EmployeService>();
+builder.Services.AddScoped<IAppService<Utilisateur>, AppService<Utilisateur>>();
+builder.Services.AddScoped<IReferentielService, ReferentielService>();
 
 // Injection des dépendances de stores
+builder.Services.AddScoped<IRepository<Utilisateur>, UtilisateurStore>();
+builder.Services.AddScoped<ILocataireStore, LocataireStore>();
 builder.Services.AddScoped<IEmployeStore, EmployeStore>();
+builder.Services.AddScoped<IReferentielStore, ReferentielStore>();
 
 
 builder.Services.AddControllers();
