@@ -18,8 +18,8 @@ namespace Infrastructure.Stores
         {
             var entity = model.ToEntity();
             _context.UTILISATEURs.Add(entity);
-            await _context.SaveChangesAsync();
-            return model;
+            var res = await _context.SaveChangesAsync();
+            return entity.ToModel();
         }
 
         public async Task DeleteAsync(Utilisateur model)

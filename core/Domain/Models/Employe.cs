@@ -4,6 +4,8 @@ public partial class Employe
 {
     public Guid IdEmploye { get; set; }
 
+    public string NomEmploye { get; set; } = "";
+
     public Guid IdLocataire { get; set; }
 
     public Guid? IdUtilisateur { get; set; }
@@ -26,7 +28,7 @@ public partial class Employe
 
     public virtual Locataire? IdLocataireNavigation { get; set; } = null!;
 
-    public virtual Utilisateur? IdUtilisateurNavigation { get; set; }
+    public virtual Utilisateur? Utilisateur  { get; set; }
 
     public virtual RefTypeContrat? TypeContratNavigation { get; set; } = null!;
 }

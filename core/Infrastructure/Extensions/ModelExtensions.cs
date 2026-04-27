@@ -37,7 +37,10 @@ namespace Infrastructure.Extensions
                 IdUtilisateur = entity.ID_UTILISATEUR,
                 NumeroCnps = entity.NUMERO_CNPS,
                 TypeContrat = entity.TYPE_CONTRAT,
-                NumeroEmploye = entity.NUMERO_EMPLOYE
+                NumeroEmploye = entity.NUMERO_EMPLOYE,
+                NomEmploye = entity.ID_UTILISATEURNavigation?.NOM_COMPLET,
+                Utilisateur = entity.ID_UTILISATEURNavigation?.ToModel(),  
+                
             };
         }
 
@@ -96,7 +99,7 @@ namespace Infrastructure.Extensions
                 EstActif = entity.EST_ACTIF,
                 EstSupprime = entity.EST_SUPPRIME,
                 IdLocataire = entity.ID_LOCATAIRE,
-                IdUtilisateur = entity.ID_LOCATAIRE,
+                IdUtilisateur = entity.ID_UTILISATEUR,
                 MotDePasseHash = entity.MOT_DE_PASSE_HASH,
                 NomComplet = entity.NOM_COMPLET,
                 Role = entity.ROLE,
@@ -117,7 +120,7 @@ namespace Infrastructure.Extensions
                 EST_ACTIF = utilisateur.EstActif,
                 EST_SUPPRIME = utilisateur.EstSupprime,
                 ID_LOCATAIRE = utilisateur.IdLocataire,
-                //ID_UTILISATEUR = utilisateur.IdUtilisateur,
+                ID_UTILISATEUR = utilisateur.IdUtilisateur,
                 MOT_DE_PASSE_HASH = utilisateur.MotDePasseHash,
                 NOM_COMPLET = utilisateur.NomComplet,
                 ROLE = utilisateur.Role,

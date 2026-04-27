@@ -1,7 +1,7 @@
 
 <p-toolbar styleClass="mb-6">
     <ng-template #start>
-        <p-button label="New" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
+        <p-button label="New" icon="pi pi-plus" severity="secondary" class="mr-2" (click)="openNew()" />
         <!-- <p-button severity="secondary" label="Delete" icon="pi pi-trash" outlined (onClick)="deleteSelectedemployes()" [disabled]="!selectedemployes || !selectedemployes.length" /> -->
     </ng-template>
 
@@ -68,12 +68,12 @@
             <!-- <td style="width: 3rem">
                 <p-tableCheckbox [value]="employe" />
             </td> -->
-            <td>{{ employe.nom }}</td>
+            <td>{{ employe.nomEmploye }}</td>
             <td>{{ employe.numeroEmploye }}</td>
             <!-- <td>
                 <img [src]="'https://primefaces.org/cdn/primeng/images/demo/employe/' + employe.image" [alt]="employe.name" style="width: 64px" class="rounded" />
             </td> -->
-            <td>{{ employe.dateEmbauche }}</td>
+            <td>{{ employe.dateEmbauche | date }}</td>
             <td>{{ employe.typeContrat }}</td>
             <td>
                 <p-tag [value]="getSeverity(employe.estActif)" [severity]="getStatus(employe.estActif)" />
@@ -87,64 +87,73 @@
     </ng-template>
 </p-table>
 
-<p-dialog [(visible)]="employeDialog" [style]="{ width: '450px' }" header="Employee Details" [modal]="true">
+<p-dialog [(visible)]="employeDialog" [style]="{ width: '750px' }" header="Informations de l'employé" [modal]="true">
     <ng-template #content>
         <div class="flex flex-col gap-6">
-            <!-- <img [src]="'https://primefaces.org/cdn/primeng/images/demo/employe/' + employe.image" [alt]="employe.image" class="block m-auto pb-4" *ngIf="employe.image" /> -->
             <div>
-                <label for="name" class="block font-bold mb-3">Name</label>
-                <input type="text" pInputText id="name" [(ngModel)]="employe.numeroEmploye" required autofocus fluid />
-                <small class="text-red-500" *ngIf="submitted && !employe.numeroEmploye">Name is required.</small>
+                <label for="name" class="block font-bold mb-3">Nom complet</label>
+                <input type="text" pInputText id="name" [(ngModel)]="createEmpDto.nomComplet" required autofocus fluid />
+                <small class="text-red-500" *ngIf="submitted && !createEmpDto.nomComplet">Le nom complet est requis.</small>
             </div>
             <div>
-                <label for="description" class="block font-bold mb-3">Description</label>
-                <textarea id="description" pTextarea [(ngModel)]="employe.numeroCnps" required rows="3" cols="20" fluid></textarea>
-            </div>
-
-            <div>
-                <label for="inventoryStatus" class="block font-bold mb-3">Inventory Status</label>
-                <p-select [(ngModel)]="employe.estActif" inputId="inventoryStatus" [options]="statuses" optionLabel="label" optionValue="label" placeholder="Select a Status" fluid />
-            </div>
-
-            <div>
-                <span class="block font-bold mb-4">Category</span>
                 <div class="grid grid-cols-12 gap-4">
-                    <div class="flex items-center gap-2 col-span-6">
-                        <p-radiobutton id="category1" name="category" value="Accessories" [(ngModel)]="employe.typeContrat" />
-                        <label for="category1">Accessories</label>
+                    <div class="col-span-6">
+                        <label for="code" class="block font-bold mb-3">Numéro de téléphone</label>
+                        <input type="phone" pInputText id="code" [(ngModel)]="createEmpDto.telephone" required fluid />
+                        <small class="text-red-500" *ngIf="submitted && !createEmpDto.telephone">Le numéro de téléphone est requis.</small>
                     </div>
-                    <div class="flex items-center gap-2 col-span-6">
-                        <p-radiobutton id="category2" name="category" value="Clothing" [(ngModel)]="employe.typeContrat" />
-                        <label for="category2">Clothing</label>
-                    </div>
-                    <div class="flex items-center gap-2 col-span-6">
-                        <p-radiobutton id="category3" name="category" value="Electronics" [(ngModel)]="employe.typeContrat" />
-                        <label for="category3">Electronics</label>
-                    </div>
-                    <div class="flex items-center gap-2 col-span-6">
-                        <p-radiobutton id="category4" name="category" value="Fitness" [(ngModel)]="employe.typeContrat" />
-                        <label for="category4">Fitness</label>
+                    <div class="col-span-6">
+                        <label for="code" class="block font-bold mb-3">Adresse email</label>
+                        <input type="email" pInputText id="code" [(ngModel)]="createEmpDto.email" required fluid />
+                        <small class="text-red-500" *ngIf="submitted && !createEmpDto.email">L'adresse email est requise.</small>
                     </div>
                 </div>
             </div>
+            <hr class="my-0" />
 
             <div class="grid grid-cols-12 gap-4">
-                <div class="col-span-6">
-                    <label for="price" class="block font-bold mb-3">Price</label>
-                    <p-inputnumber id="price" [(ngModel)]="employe.salaireBaseXaf" mode="currency" currency="USD" locale="en-US" fluid />
+                <div class="col-span-4">
+                    <label for="typeContrat" class="block font-bold mb-3">Type de contrat</label>
+                    <p-select [(ngModel)]="createEmpDto.typeContrat" inputId="typeContrat" [options]="typeContrats" optionLabel="libelle" optionValue="code" [virtualScroll]="true" [virtualScrollItemSize]="10" placeholder="Select a Type" fluid />
+                    <small class="text-red-500" *ngIf="submitted && !createEmpDto.typeContrat">Le type de contrat est requis.</small>
                 </div>
-                <div class="col-span-6">
-                    <label for="quantity" class="block font-bold mb-3">Quantity</label>
-                    <p-inputnumber id="quantity" [(ngModel)]="employe.salaireBaseXaf" fluid />
+                <div class="col-span-4">
+                    <label for="numeroCnps" class="block font-bold mb-3">Numéro CNPS</label>
+                    <input type="text" pInputText id="numeroCnps" [(ngModel)]="createEmpDto.numeroCnps" required fluid />
+                    <small class="text-red-500" *ngIf="submitted && !createEmpDto.numeroCnps">Le numéro CNPS est requis.</small>
+                </div>
+                <div class="col-span-4">
+                    <label for="numeroEmploye" class="block font-bold mb-3">Numéro d'employé</label>
+                    <input type="text" pInputText id="numeroEmploye" [(ngModel)]="createEmpDto.numeroEmploye" required fluid />
+                    <small class="text-red-500" *ngIf="submitted && !createEmpDto.numeroEmploye">Le numéro d'employé est requis.</small>
                 </div>
             </div>
+            <div class="grid grid-cols-12 gap-4">
+                <div class="col-span-5">
+                    <label for="salaireBaseXaf" class="block font-bold mb-3">Salaire de base</label>
+                    <p-inputnumber id="salaireBaseXaf" [(ngModel)]="createEmpDto.salaireBaseXaf" mode="currency" currency="USD" locale="en-US" fluid />
+                    <small class="text-red-500" *ngIf="submitted && !createEmpDto.salaireBaseXaf">Le salaire de base est requis.</small>
+                </div>
+                <div class="col-span-3">
+                    <label for="dateEmbauche" class="block font-bold mb-3">Date d'embauche</label>
+                    <p-datepicker [showIcon]="true" [showButtonBar]="false" [(ngModel)]="createEmpDto.dateEmbauche" dateFormat="dd/mm/yy"></p-datepicker>
+                    <small class="text-red-500" *ngIf="submitted && !createEmpDto.dateEmbauche">La date d'embauche est requise.</small>
+                </div>
+                <div class="col-span-4">
+                    <label for="role" class="block font-bold mb-3">Rôle</label>
+                    <p-select [(ngModel)]="createEmpDto.role" inputId="role" [options]="listeRoles" optionLabel="libelle" optionValue="code" [virtualScroll]="true"  placeholder="Select a Role" fluid />
+                    <small class="text-red-500" *ngIf="submitted && !createEmpDto.role">Le rôle est requis.</small>
+                </div>
+            </div>
+
         </div>
     </ng-template>
 
     <ng-template #footer>
-        <p-button label="Cancel" icon="pi pi-times" text (click)="hideDialog()" />
-        <p-button label="Save" icon="pi pi-check" (click)="saveEmploye()" />
+        <p-button label="Fermer" icon="pi pi-times" text (click)="hideDialog()" />
+        <p-button label="Enregistrer" icon="pi pi-check" (click)="saveEmploye()" />
     </ng-template>
 </p-dialog>
+
 
 <p-confirmdialog [style]="{ width: '450px' }" />

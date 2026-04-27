@@ -37,12 +37,15 @@ namespace Infrastructure.Stores
 
         public async Task<IEnumerable<Employe>> GetAllEmployeAsync()
         {
-            return (await _context.EMPLOYEs.ToListAsync()).ToModelCollection();
+            return (await _context.EMPLOYEs
+                    .Include(x=>x.ID_UTILISATEURNavigation)
+                    .ToListAsync())
+                .ToModelCollection();
         }
 
         public async Task<Employe> GetEmployeByIdAsync(Guid id)
         {
-            var employe = await _context.EMPLOYEs.AsNoTracking().FirstAsync(x => x.ID_EMPLOYE == id);
+            var employe = await _context.EMPLOYEs.Include(x => x.ID_UTILISATEURNavigation).AsNoTracking().FirstAsync(x => x.ID_EMPLOYE == id);
             return employe.ToModel();
         }
 
