@@ -198,7 +198,6 @@ export class EmployeeList {
         this.employeDialog = true;
     }
 
-
     getSeverity(status: boolean) {
         switch (status) {
             case true:

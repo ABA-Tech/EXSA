@@ -12,7 +12,7 @@ namespace Application.Services
         {
             _referentielStore = referentielStore ?? throw new ArgumentNullException(nameof(referentielStore));
         }
-        public async Task<IEnumerable<RefTypeIntervention>> GetAllInterventionsAsync()
+        public async Task<IEnumerable<RefTypeIntervention>> GetAllTypeInterventionsAsync()
         {
             return await _referentielStore.GetInterventionsAsync();
         }

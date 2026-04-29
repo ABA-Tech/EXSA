@@ -45,16 +45,22 @@ namespace ExsaApi.Controllers
             return Ok(await _referentielService.GetAllTypePhotosAsync());
         }
 
-        [HttpGet("GetInterventions")]
-        public async Task<IActionResult> GetAllInterventions()
+        [HttpGet("GetTypeInterventions")]
+        public async Task<IActionResult> GetAllTypeInterventions()
         {
-            return Ok(await _referentielService.GetAllInterventionsAsync());
+            return Ok(await _referentielService.GetAllTypeInterventionsAsync());
         }
 
         [HttpGet("GetTypeMouvements")]
         public async Task<IActionResult> GetAllTypeMouvements()
         {
             return Ok(await _referentielService.GetAllTypeMouvementsAsync());
+        }
+
+        [HttpGet("GetStatutInterventions")]
+        public async Task<IActionResult> GetAllStatutInterventions()
+        {
+            return Ok(await _referentielService.GetAllStatutInterventionsAsync());
         }
     }
 }

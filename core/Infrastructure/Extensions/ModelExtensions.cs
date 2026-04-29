@@ -131,5 +131,102 @@ namespace Infrastructure.Extensions
         {
             return utilisateurs.Select(x => x.ToModel());
         }
+
+        public static Intervention ToModel(this INTERVENTION intervention)
+        {
+            return new Intervention
+            {
+                Adresse = intervention.ADRESSE,
+                DateCreation = intervention.DATE_CREATION,
+                DateModification = intervention.DATE_MODIFICATION,
+                DateDebut = intervention.DATE_DEBUT,
+                DateFin = intervention.DATE_FIN,
+                DatePlanifiee = intervention.DATE_PLANIFIEE,
+                DateValidation = intervention.DATE_VALIDATION,
+                Description = intervention.DESCRIPTION,
+                EstSupprime = intervention.EST_SUPPRIME,
+                IdCreateur = intervention.ID_CREATEUR,
+                IdIntervention = intervention.ID_INTERVENTION,
+                IdLocal = intervention.ID_LOCAL,
+                IdLocataire = intervention.ID_LOCATAIRE,
+                IdValidateur = intervention.ID_VALIDATEUR,
+                Latitude = intervention.LATITUDE,
+                Longitude = intervention.LONGITUDE,
+                NomClient = intervention.NOM_CLIENT,
+                Notes = intervention.NOTES,
+                Priorite = intervention.PRIORITE,
+                Reference = intervention.REFERENCE,
+                Statut = intervention.STATUT,
+                Titre = intervention.TITRE,
+                Type = intervention.TYPE,
+                UrlSignature = intervention.URL_SIGNATURE
+            };
+        }
+
+        public static INTERVENTION ToEntity(this Intervention intervention)
+        {
+            return new INTERVENTION
+            {
+                ADRESSE = intervention.Adresse,
+                DATE_CREATION = intervention.DateCreation,
+                DATE_DEBUT = intervention.DateDebut,
+                DATE_FIN = intervention.DateFin,
+                DATE_MODIFICATION = intervention.DateModification,
+                DATE_PLANIFIEE = intervention.DatePlanifiee,
+                DESCRIPTION = intervention.Description,
+                DATE_VALIDATION = intervention.DateValidation,
+                EST_SUPPRIME = intervention.EstSupprime,
+                ID_CREATEUR = intervention.IdCreateur,
+                ID_INTERVENTION = intervention.IdIntervention.HasValue ? intervention.IdIntervention.Value: Guid.NewGuid(),
+                ID_LOCAL = intervention.IdLocal,
+                ID_LOCATAIRE = intervention.IdLocataire,
+                ID_VALIDATEUR = intervention.IdValidateur,
+                LONGITUDE = intervention.Longitude,
+                LATITUDE = intervention.Latitude,
+                NOM_CLIENT = intervention.NomClient,
+                NOTES = intervention.Notes,
+                PRIORITE = intervention.Priorite,
+                REFERENCE = intervention.Reference,
+                STATUT = intervention.Statut,
+                TITRE = intervention.Titre,
+                TYPE = intervention.Type,
+                URL_SIGNATURE = intervention.UrlSignature
+            };
+        }
+
+        public static IEnumerable<Intervention> ToModelCollection(this IEnumerable<INTERVENTION> interventions)
+        {
+            return interventions.Select(x => x.ToModel());
+        }
+
+        public static AffectationIntervention ToModel(this AFFECTATION_INTERVENTION entity)
+        {
+            return new AffectationIntervention
+            {
+                DateAffectation = entity.DATE_AFFECTATION,
+                Intervention = entity.ID_INTERVENTIONNavigation?.ToModel(),
+                EstPrincipal = entity.EST_PRINCIPAL,
+                IdAffectation = entity.ID_AFFECTATION,
+                IdIntervention = entity.ID_INTERVENTION,
+                IdTechnicien = entity.ID_TECHNICIEN,
+                Technicien = entity.ID_TECHNICIENNavigation?.ToModel(),
+            };
+        }
+
+        public static AFFECTATION_INTERVENTION ToEntity(this AffectationIntervention model)
+        {
+            return new AFFECTATION_INTERVENTION
+            {
+                DATE_AFFECTATION = model.DateAffectation,
+                EST_PRINCIPAL = model.EstPrincipal,
+                ID_INTERVENTION = model.IdIntervention,
+                ID_TECHNICIEN = model.IdTechnicien,
+            };
+        }
+
+        public static IEnumerable<AffectationIntervention> ToModelCollection(this IEnumerable<AFFECTATION_INTERVENTION> entities)
+        {
+            return entities.Select(x => x.ToModel());
+        }
     }
 }

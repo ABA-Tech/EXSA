@@ -53,21 +53,21 @@ public partial class INTERVENTION
 
     public bool EST_SUPPRIME { get; set; }
 
-    public virtual ICollection<AFFECTATION_INTERVENTION> AFFECTATION_INTERVENTIONs { get; set; } = new List<AFFECTATION_INTERVENTION>();
+    public virtual ICollection<AFFECTATION_INTERVENTION>? AFFECTATION_INTERVENTIONs { get; set; } = new List<AFFECTATION_INTERVENTION>();
 
-    public virtual ICollection<FACTURE> FACTUREs { get; set; } = new List<FACTURE>();
+    public virtual ICollection<FACTURE>? FACTUREs { get; set; } = new List<FACTURE>();
 
-    public virtual UTILISATEUR ID_CREATEURNavigation { get; set; } = null!;
+    public virtual UTILISATEUR? ID_CREATEURNavigation { get; set; } = null;
 
-    public virtual LOCATAIRE ID_LOCATAIRENavigation { get; set; } = null!;
+    public virtual LOCATAIRE? ID_LOCATAIRENavigation { get; set; } = null;
 
     public virtual UTILISATEUR? ID_VALIDATEURNavigation { get; set; }
 
-    public virtual ICollection<MOUVEMENT_STOCK> MOUVEMENT_STOCKs { get; set; } = new List<MOUVEMENT_STOCK>();
+    public virtual ICollection<MOUVEMENT_STOCK>? MOUVEMENT_STOCKs { get; set; } = new List<MOUVEMENT_STOCK>();
 
-    public virtual ICollection<PHOTO_INTERVENTION> PHOTO_INTERVENTIONs { get; set; } = new List<PHOTO_INTERVENTION>();
+    public virtual ICollection<PHOTO_INTERVENTION>? PHOTO_INTERVENTIONs { get; set; } = new List<PHOTO_INTERVENTION>();
 
-    public virtual REF_STATUT_INTERVENTION STATUTNavigation { get; set; } = null!;
+    public virtual REF_STATUT_INTERVENTION? STATUTNavigation { get; set; } = null;
 
-    public virtual REF_TYPE_INTERVENTION TYPENavigation { get; set; } = null!;
+    public virtual REF_TYPE_INTERVENTION? TYPENavigation { get; set; } = null;
 }
