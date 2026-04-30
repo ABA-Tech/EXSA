@@ -80,10 +80,19 @@ namespace ExsaApi.Controllers
         }
 
         // DELETE api/<InterventionController>/5
-        [HttpPost("GetAffectations")]
-        public async Task<IActionResult> GetAffectations()
+        [HttpPost("RemoveAllAffectation")]
+        public async Task<IActionResult> DeleteAllAffectation(IEnumerable<AffectationIntervention> affectations)
         {
-            var affectations = await _interventionService.GetAllAffectationsAsync();
+            foreach(var affectation in affectations)
+                await _interventionService.RemoveAffectationAsync(affectation);
+            return Ok();
+        }
+
+        // DELETE api/<InterventionController>/5
+        [HttpGet("GetAffectations/{IdIntervention}")]
+        public async Task<IActionResult> GetAffectations(Guid IdIntervention)
+        {
+            var affectations = await _interventionService.GetAllAffectationsAsync(IdIntervention);
             return Ok(affectations);
         }
 
@@ -96,6 +105,17 @@ namespace ExsaApi.Controllers
                 intervention.IdIntervention = idIntervention;
             }
 
+            intervention.DateModification = DateTime.Now;
+            return Ok(await _interventionService.UpdateAsync(intervention));
+        }
+
+        // PUT api/<InterventionController>/5
+        [HttpPut("UpdateStatutIntervention/{idIntervention}")]
+        public async Task<IActionResult> UpdateStatut(Guid idIntervention, string statutIntervention)
+        {
+            var intervention = await _interventionService.GetByIdAsync(idIntervention);
+
+            intervention.Statut = statutIntervention;
             intervention.DateModification = DateTime.Now;
             return Ok(await _interventionService.UpdateAsync(intervention));
         }

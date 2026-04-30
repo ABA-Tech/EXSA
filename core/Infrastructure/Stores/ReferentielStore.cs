@@ -44,7 +44,7 @@ namespace Infrastructure.Stores
 
         public async Task<IEnumerable<RefStatutIntervention>> GetStatutInterventionsAsync()
         {
-            return (await _context.REF_STATUT_INTERVENTIONs.ToListAsync())
+            return (await _context.REF_STATUT_INTERVENTIONs.OrderBy(x=>x.ORDRE).ToListAsync())
                 .Select(x => new RefStatutIntervention
                 {
                     Code = x.CODE,

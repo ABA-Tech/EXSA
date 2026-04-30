@@ -27,6 +27,7 @@ export interface Intervention {
   dateCreation?: string;
   dateModification?: string;
   estSupprime?: boolean;
+  statutIntervention?: RefStatutIntervention;
 }
 
 export interface AffectationIntervention {
@@ -35,6 +36,13 @@ export interface AffectationIntervention {
   idTechnicien?: string;
   dateAffectation?: string;
   estPrincipal?: boolean;
+}
+
+
+export interface RefStatutIntervention {
+    code: string;
+    libelle: string;
+    ordre: number;
 }
 
 @Injectable()
@@ -47,4 +55,17 @@ export class InterventionService extends ApiService<Intervention> {
     CreateAffectation(Affectations: AffectationIntervention[]): Observable<AffectationIntervention[]> {
         return this.httpClient.post<AffectationIntervention[]>(`${this.baseUrl}/Interventions/CreateAffectation`, Affectations);
     }
+
+    GetAffectations(idIntervention: string): Observable<AffectationIntervention[]> {
+        return this.httpClient.get<AffectationIntervention[]>(`${this.baseUrl}/Interventions/GetAffectations/${idIntervention}`);
+    }
+
+    RemoveAffectation(affectations: AffectationIntervention): Observable<void> {
+        return this.httpClient.post<void>(`${this.baseUrl}/Interventions/RemoveAffectation`, affectations);
+    }
+
+    UpdateStatutIntervention(idIntervention: string, statutIntervention: string): Observable<AffectationIntervention[]> {
+        return this.httpClient.put<AffectationIntervention[]>(`${this.baseUrl}/Interventions/UpdateStatutIntervention/${idIntervention}?statutIntervention=${statutIntervention}`, null);
+    }
+
 }

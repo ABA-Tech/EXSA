@@ -159,7 +159,8 @@ namespace Infrastructure.Extensions
                 Statut = intervention.STATUT,
                 Titre = intervention.TITRE,
                 Type = intervention.TYPE,
-                UrlSignature = intervention.URL_SIGNATURE
+                UrlSignature = intervention.URL_SIGNATURE,
+                StatutIntervention = intervention.STATUTNavigation?.ToModel(),
             };
         }
 
@@ -194,6 +195,8 @@ namespace Infrastructure.Extensions
             };
         }
 
+
+
         public static IEnumerable<Intervention> ToModelCollection(this IEnumerable<INTERVENTION> interventions)
         {
             return interventions.Select(x => x.ToModel());
@@ -213,6 +216,21 @@ namespace Infrastructure.Extensions
             };
         }
 
+        public static RefStatutIntervention ToModel(this REF_STATUT_INTERVENTION entity) 
+        {
+            return new RefStatutIntervention
+            {
+                Code = entity.CODE,
+                Libelle = entity.LIBELLE,
+                Ordre = entity.ORDRE
+            };
+        }
+
+        public static IEnumerable<RefStatutIntervention> ToModelCollecton(this IEnumerable<REF_STATUT_INTERVENTION> entities)
+        {
+            return entities.Select(x => x.ToModel());
+        }
+
         public static AFFECTATION_INTERVENTION ToEntity(this AffectationIntervention model)
         {
             return new AFFECTATION_INTERVENTION
@@ -221,6 +239,7 @@ namespace Infrastructure.Extensions
                 EST_PRINCIPAL = model.EstPrincipal,
                 ID_INTERVENTION = model.IdIntervention,
                 ID_TECHNICIEN = model.IdTechnicien,
+                ID_AFFECTATION = model.IdAffectation.HasValue ? model.IdAffectation.Value : new Guid()
             };
         }
 

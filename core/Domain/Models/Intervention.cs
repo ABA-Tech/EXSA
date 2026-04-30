@@ -64,7 +64,7 @@ public partial class Intervention
 
     //public virtual ICollection<PhotoIntervention> PhotoInterventions { get; set; } = new List<PhotoIntervention>();
 
-    //public virtual RefStatutIntervention StatutNavigation { get; set; } = null!;
+    public virtual RefStatutIntervention? StatutIntervention { get; set; } = null!;
 
-    //public virtual RefTypeIntervention TypeNavigation { get; set; } = null!;
+    public virtual RefTypeIntervention? TypeNavigation { get; set; } = null!;
 }

@@ -17,9 +17,9 @@ namespace Application.Services
             return await _interventionStore.AddAffectationInterventionAsync(affectationIntervention);
         }
 
-        public async Task<IEnumerable<AffectationIntervention>> GetAllAffectationsAsync()
+        public async Task<IEnumerable<AffectationIntervention>> GetAllAffectationsAsync(Guid IdIntervention)
         {
-            return await _interventionStore.GetAffectationsAsync();
+            return await _interventionStore.GetAffectationsAsync(IdIntervention);
         }
 
         public async Task RemoveAffectationAsync(AffectationIntervention affectation)

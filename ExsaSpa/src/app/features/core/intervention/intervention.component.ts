@@ -1,4 +1,4 @@
-import { Component, signal, ViewChild, OnInit } from '@angular/core';
+import { Component, signal, ViewChild, OnInit, computed } from '@angular/core';
 import { AffectationIntervention, Intervention, InterventionService } from '../../services/intervention.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -24,7 +24,8 @@ import { ConfirmationService } from 'primeng/api';
 import { FieldsetModule } from 'primeng/fieldset';
 import { StepperModule } from 'primeng/stepper';
 import { PickListModule } from 'primeng/picklist';
-
+import { CardModule } from 'primeng/card';
+import { ChipModule } from 'primeng/chip';
 
 interface Column {
     field: string;
@@ -63,7 +64,9 @@ interface ExportColumn {
     ConfirmDialogModule,
     FieldsetModule,
     StepperModule,
-    PickListModule
+    PickListModule,
+    CardModule,
+    ChipModule
   ],
   templateUrl: './intervention.component.html',
   styleUrl: './intervention.component.scss',
@@ -79,8 +82,10 @@ export class InterventionComponent {
     typeInterventionList: any[] = [];
     statutInterventionList: any[] = [];
 
+    sourceEmployeesData = signal<any[]>([]);
     sourceEmployees = signal<any[]>([]);
     targetEmployees = signal<any[]>([]);
+    affectationList = signal<AffectationIntervention[]>([]);
 
     @ViewChild('dt') dt!: Table;
     exportColumns!: ExportColumn[];
@@ -99,20 +104,34 @@ export class InterventionComponent {
         this.loadData();
     }
 
-    loadData() {
+    getInterventions() {
         this.interventionService.getAll().subscribe({
             next: (data) => {
                 this.interventionList.set(data);
+                console.log(data);
             },
             error: (err) => {
                 console.error('Error fetching interventions:', err);
             }
         });
+    }
+
+    getLibelleTypeIntervention(code: string | undefined): string {
+        const type = this.typeInterventionList.find(t => t.code === code);
+        return type ? type.libelle : code || '';
+    }
+
+    getLibelleStatutIntervention(code: string | undefined): string {
+        const statut = this.statutInterventionList.find(s => s.code === code);
+        return statut ? statut.libelle : code || '';
+    }
+
+    loadData() {
+        this.getInterventions();
 
         this.referentielService.getDataFromEndpoint('GetTypeInterventions').subscribe({
             next: (data) => {
                 this.typeInterventionList = data;
-
             },
             error: (err) => {
                 console.error('Error fetching type interventions:', err);
@@ -192,18 +211,24 @@ export class InterventionComponent {
         this.dt.exportCSV();
     }
 
-    getSeverity(status: string): string {
+    getSeverity(status: string | undefined): 'success' | 'secondary' | 'info' | 'warn' | 'danger' | 'contrast' | undefined | null {
         switch (status) {
-            case 'Planifiée':
+            case 'CREEE':
                 return 'info';
-            case 'En cours':
-                return 'warning';
-            case 'Terminée':
-                return 'success';
-            case 'Annulée':
+            case 'EN_ATTENTE':
+                return 'warn';
+            case 'EN_COURS':
                 return 'danger';
-            default:
+            case 'VALIDEE':
+                return 'success';
+            case 'FACTUREE':
                 return 'secondary';
+            case 'TERMINEE':
+                return 'contrast';
+            case 'AFFECTATION':
+                return 'contrast';
+            default:
+                return undefined;
         }
     }
 
@@ -264,15 +289,45 @@ export class InterventionComponent {
         this.intervention.dateFin = new Date(intervention.dateFin!).toLocaleDateString('fr-FR');
         this.intervention.datePlanifiee = new Date(intervention.datePlanifiee!).toLocaleDateString('fr-FR');
         this.intervention.dateValidation = new Date(intervention.dateValidation!).toLocaleDateString('fr-FR');
+        this.currentNumStep.set(intervention.statutIntervention ? intervention.statutIntervention.ordre : 1);
 
         this.employeService.getAll().subscribe({
             next: (data) => {
-                this.sourceEmployees.set(data);
-
-                // this.targetEmployees.set(data.filter((emp: any) => emp.idIntervention === intervention.idIntervention));
+                this.sourceEmployeesData.set(data);
+                this.getAffectations(intervention.idIntervention!);
             },
             error: (err) => {
                 console.error('Error fetching employees:', err);
+            }
+        });
+    }
+
+    getAffectations(interventionId: string) {
+        this.interventionService.GetAffectations(interventionId).subscribe({
+            next: (data) => {
+                if(data) {
+                    this.affectationList.set(data);
+                    const assignedEmployeeIds = data.map(a => a.idTechnicien);
+                    this.targetEmployees.set(this.sourceEmployeesData().filter(emp => assignedEmployeeIds.includes(emp.idUtilisateur)));
+                    this.sourceEmployees.set(this.sourceEmployeesData().filter(emp => !assignedEmployeeIds.includes(emp.idUtilisateur)));
+                }
+            },
+            error: (err) => {
+                console.error('Error fetching intervention details:', err);
+            }
+        });
+    }
+
+    updateStatutIntervention() {
+        this.interventionService.UpdateStatutIntervention(this.intervention.idIntervention!, this.intervention.statut!).subscribe({
+            next: (data) => {
+                if(data) {
+                    this.getInterventions();
+                    //this.getInterventionDetails(this.intervention);
+                }
+            },
+            error: (err) => {
+                console.error('Error updating intervention status:', err);
             }
         });
     }
@@ -289,8 +344,11 @@ export class InterventionComponent {
                 // return;
                 this.interventionService.update(this.intervention.idIntervention, this.intervention).subscribe({
                     next: (data) => {
-                        if(data)
+                        if(data) {
                             this.currentNumStep.set(this.currentNumStep() + move);
+                            this.intervention.statut = 'AFFECTATION';
+                            this.updateStatutIntervention();
+                        }
                     },
                     error: (err) => {
                         console.error('Error updating intervention:', err);
@@ -310,16 +368,30 @@ export class InterventionComponent {
             const employeeIds = this.targetEmployees().map(emp => emp.idUtilisateur);
             this.interventionService.CreateAffectation(this.buildAffectations(this.intervention.idIntervention!, employeeIds)).subscribe({
                 next: (data) => {
-                    if(data)
+                    if(data) {
                         this.currentNumStep.set(this.currentNumStep() + move);
+                        this.intervention.statut = 'EN_ATTENTE';
+                        this.updateStatutIntervention();
+                    }
                 },
                 error: (err) => {
                     console.error('Error creating affectations:', err);
                 }
             });
         }else {
-             this.currentNumStep.set(this.currentNumStep() + move);
+            this.intervention.statut = 'CREEE';
+            this.updateStatutIntervention();
+            this.currentNumStep.set(this.currentNumStep() + move);
         }
+    }
+
+    etapeTechnicienDemarre(move: number) {
+        if(move> 0) {
+            this.intervention.statut = 'EN_COURS';
+            this.updateStatutIntervention();
+        }
+        
+        this.currentNumStep.set(this.currentNumStep() + move);
     }
 
     buildAffectations(interventionId: string, employeeIds: string[]): AffectationIntervention[] {
@@ -329,5 +401,33 @@ export class InterventionComponent {
             dateAffectation: this.formatDate(new Date().toLocaleDateString('fr-FR')),
             estPrincipal: false
         }));
+    }
+
+    removeAffectation(affectation: AffectationIntervention) {
+        this.interventionService.RemoveAffectation(affectation).subscribe({
+            next: () => {
+                this.getAffectations(this.intervention.idIntervention!);
+                // this.affectationList.set(this.affectationList().filter(a => a.idTechnicien !== affectation.idTechnicien));
+                // this.targetEmployees.set(this.targetEmployees().filter((emp: any) => emp.idUtilisateur !== affectation.idTechnicien));
+                // this.sourceEmployees.set([...this.sourceEmployees(), affectation.idTechnicien].map(id => this.sourceEmployeesData().find(emp => emp.idUtilisateur === id)));
+            },
+            error: (err) => {
+                console.error('Error removing affectation:', err);
+            }
+        });
+    }
+
+    onMoveToSource(event: any) {
+        const movedItems = event.items;
+        const movedItemIds = movedItems.map((item: any) => item.idUtilisateur);
+        var affectationsToRemove = this.affectationList().filter(a => movedItemIds.includes(a.idTechnicien!))[0];
+        console.log(affectationsToRemove);
+        this.removeAffectation(affectationsToRemove);
+    }
+
+    onMoveAllToSource(event: any) {
+        for (let item of this.targetEmployees()) {
+            this.removeAffectation(item);
+        }
     }
 }

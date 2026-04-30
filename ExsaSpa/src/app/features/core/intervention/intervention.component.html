@@ -74,7 +74,7 @@
                 <img [src]="'https://primefaces.org/cdn/primeng/images/demo/employe/' + employe.image" [alt]="employe.name" style="width: 64px" class="rounded" />
             </td> -->
             <td>
-                <p-tag [value]="intervention.statut" />
+                <p-tag [value]="intervention.statutIntervention?.libelle" [severity]="getSeverity(intervention.statutIntervention?.code)" />
             </td>
             <td>{{ intervention.adresse }}</td>
             <td>{{ intervention.dateDebut | date }}</td>
@@ -187,10 +187,8 @@
     <div class="card  mt-5">
         <p-stepper [value]="currentNumStep()" class="basis-[50rem]" [linear]="true">
             <!-- <p-step-list style="display: none;"> -->
-            <p-step-list>
-                <p-step [value]="1">Header I</p-step>
-                <p-step [value]="2">Header II</p-step>
-                <p-step [value]="3">Header II</p-step>
+            <p-step-list >
+                <p-step *ngFor="let step of statutInterventionList" [value]="step.ordre"> {{ step.libelle }} </p-step>
             </p-step-list>
             <p-step-panels>
                 <p-step-panel [value]="1">
@@ -284,11 +282,25 @@
                         </div>
                     </ng-template>
                 </p-step-panel>
+
                 <p-step-panel [value]="2">
                     <ng-template #content let-activateCallback="activateCallback">
 
                         <div class="card">
-                            <p-picklist [source]="sourceEmployees()" [target]="targetEmployees()" [dragdrop]="true" [responsive]="true" sourceFilterPlaceholder="Search by name" targetFilterPlaceholder="Search by name" breakpoint="1400px" scrollHeight="20rem" showSourceControls="false" showTargetControls="false">
+                            <p-pick-list class="my-picklist-horizontal"
+                              [source]="sourceEmployees()"
+                              [target]="targetEmployees()"
+                              [dragdrop]="true"
+                              [responsive]="true"
+                              sourceFilterPlaceholder="Search by name"
+                              targetFilterPlaceholder="Search by name"
+                              breakpoint="1400px"
+                              scrollHeight="20rem"
+                              showSourceControls="false"
+                              showTargetControls="false"
+                              (onMoveToSource)="onMoveToSource($event)"
+                              (onMoveAllToSource)="onMoveAllToSource($event)"
+                              >
                                 <ng-template let-option let-selected="selected" #item>
                                     <div class="flex flex-wrap p-1 items-center gap-4 w-full">
                                         <!-- <img class="w-12 shrink-0 rounded" src="https://primefaces.org/cdn/primeng/images/demo/product/{{ option.image }}" [alt]="option.name" /> -->
@@ -306,7 +318,7 @@
                                         <span class="font-bold sm:ml-8">{{ option.utilisateur?.email ?? 'Email non disponible' }}</span>
                                     </div>
                                 </ng-template>
-                            </p-picklist>
+                            </p-pick-list>
                         </div>
 
                         <div class="flex pt-6 justify-between">
@@ -315,16 +327,50 @@
                         </div>
                     </ng-template>
                 </p-step-panel>
+
                 <p-step-panel [value]="3">
                     <ng-template #content let-activateCallback="activateCallback">
-                        <div class="flex flex-col h-48">
-                            <div class="border-2 border-dashed border-surface-200 dark:border-surface-700 rounded bg-surface-50 dark:bg-surface-950 flex-auto flex justify-center items-center font-medium">Content III</div>
+                        <div>
+                            <div class="flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <div class="text-lg font-semibold mb-1">Intervention en attente</div>
+                            </div>
+                            </div>
+
+                            <p-card [style]="{ 'background-color': '#f5f5f5' }">
+                                <div class="grid grid-cols-12 gap-4" style="padding-bottom: -10px;">
+                                    <span class="flex flex-1 items-center gap-2 col-span-10">
+                                        <span class="font-bold">{{ intervention.reference }}</span>
+                                    </span>
+                                    <span class="col-span-2"><p-tag [value]="intervention.statut" [severity]="getSeverity(intervention.statut)" /></span>
+
+                                    <span class="col-span-4">TITRE</span>
+                                    <span class="col-span-4">TYPE</span>
+                                    <span class="col-span-4">PRIORITE</span>
+
+                                    <span class="col-span-4 font-medium">{{ intervention.titre }}</span>
+                                    <span class="col-span-4"><p-tag value="{{ getLibelleTypeIntervention(intervention.type) }}" /></span>
+                                    <span class="col-span-4"><p-tag value="{{ intervention.priorite }}" severity="danger"></p-tag></span>
+                                </div>
+                            </p-card>
+
+                            <hr class="my-4"/>
+
+                            <p-card [style]="{ 'background-color': '#B5D4F4', 'border': '0.5px solid #B5D4F4', 'color': '#0C447C' }">
+                                <strong style="font-size: 20px; font-weight: bold;">({{affectationList().length}}) affectations créées</strong>
+                                <div class="flex flex-wrap gap-2 mt-3">
+                                <p-chip *ngFor="let aff of targetEmployees()" label="{{ aff.utilisateur.nomComplet }}"></p-chip>
+                                </div>
+                            </p-card>
                         </div>
-                        <div class="flex pt-6 justify-start">
-                            <p-button label="Back" icon="pi pi-arrow-left" iconPos="right" (onClick)="etapeAfectation(-1)" />
+                        <div class="flex pt-6 justify-between">
+                            <p-button label="Précédent" severity="secondary" icon="pi pi-arrow-left" (onClick)="etapeTechnicienDemarre(-1)" />
+                            <p-button label="Technicien démarre" icon="pi pi-arrow-right" iconPos="right" (onClick)="etapeTechnicienDemarre(1)" />
                         </div>
                     </ng-template>
                 </p-step-panel>
+
+
             </p-step-panels>
         </p-stepper>
     </div>

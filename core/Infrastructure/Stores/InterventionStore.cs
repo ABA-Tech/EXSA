@@ -18,15 +18,18 @@ namespace Infrastructure.Stores
         public async Task<AffectationIntervention> AddAffectationInterventionAsync(AffectationIntervention affectationIntervention)
         {
             var entity = affectationIntervention.ToEntity();
+            if (_dbContext.AFFECTATION_INTERVENTIONs.FirstOrDefault(x => x.ID_INTERVENTION == affectationIntervention.IdIntervention && x.ID_TECHNICIEN == affectationIntervention.IdTechnicien) != null)
+                return affectationIntervention;
+
             _dbContext.AFFECTATION_INTERVENTIONs.Add(entity);
             await _dbContext.SaveChangesAsync();
 
             return affectationIntervention;
         }
 
-        public async Task<IEnumerable<AffectationIntervention>> GetAffectationsAsync()
+        public async Task<IEnumerable<AffectationIntervention>> GetAffectationsAsync(Guid IdIntervention)
         {
-            return (await _dbContext.AFFECTATION_INTERVENTIONs.ToListAsync()).ToModelCollection();
+            return (await _dbContext.AFFECTATION_INTERVENTIONs.Where(x=>x.ID_INTERVENTION == IdIntervention).ToListAsync()).ToModelCollection();
         }
 
         public async Task RemoveAffectationAsync(AffectationIntervention affectation)
@@ -60,12 +63,12 @@ namespace Infrastructure.Stores
 
         public async Task<IEnumerable<Intervention>> GetAllAsync()
         {
-            return (await _dbContext.INTERVENTIONs.ToListAsync()).ToModelCollection();
+            return (await _dbContext.INTERVENTIONs.Include(x=>x.STATUTNavigation).ToListAsync()).ToModelCollection();
         }
 
         public async Task<Intervention> GetByIdAsync(Guid id)
         {
-            return (await _dbContext.INTERVENTIONs.AsNoTracking().FirstAsync(x => x.ID_INTERVENTION == id)).ToModel();
+            return (await _dbContext.INTERVENTIONs.Include(x=>x.STATUTNavigation).AsNoTracking().FirstAsync(x => x.ID_INTERVENTION == id)).ToModel();
         }
 
         public async Task<Intervention> UpdateAsync(Intervention model)
