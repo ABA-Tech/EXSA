@@ -247,5 +247,42 @@ namespace Infrastructure.Extensions
         {
             return entities.Select(x => x.ToModel());
         }
+
+        public static PhotoIntervention ToModel(this PHOTO_INTERVENTION entity)
+        {
+            return new PhotoIntervention
+            {
+                DatePrise = entity.DATE_PRISE,
+                IdIntervention = entity.ID_INTERVENTION,
+                IdPhoto = entity.ID_PHOTO,
+                IdUploadeur = entity.ID_UPLOADEUR,
+                Latitude = entity.LATITUDE,
+                Longitude = entity.LONGITUDE,
+                TypePhoto = entity.TYPE_PHOTO,
+                UrlBlob = entity.URL_BLOB,
+                Utilisateur = entity.ID_UPLOADEURNavigation?.ToModel()
+            };
+        }
+
+        public static PHOTO_INTERVENTION ToEntity(this PhotoIntervention model)
+        {
+            return new PHOTO_INTERVENTION
+            {
+                URL_BLOB = model.UrlBlob,
+                DATE_PRISE = model.DatePrise,
+                ID_INTERVENTION = model.IdIntervention,
+                ID_UPLOADEUR = model.IdUploadeur,
+                LATITUDE = model.Latitude,
+                LONGITUDE = model.Longitude,
+                TYPE_PHOTO = model.TypePhoto,
+                ID_PHOTO = model.IdPhoto.HasValue ? model.IdPhoto.Value : new Guid()
+            };
+        }
+
+        public static IEnumerable<PhotoIntervention> ToModelCollection(this IEnumerable<PHOTO_INTERVENTION> models)
+        {
+            return models.Select(x => x.ToModel());
+        }
+
     }
 }

@@ -1,8 +1,11 @@
 ﻿using Application.Services;
 using Domain.Models;
+using Domain.Models.Dto;
 using Domain.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.Linq;
 
 namespace ExsaApi.Controllers
 {
@@ -126,6 +129,92 @@ namespace ExsaApi.Controllers
         {
             await _interventionService.DeleteByIdAsync(idIntervention);
             return Ok();
+        }
+
+
+
+        [HttpPost("uploadPhotos")]
+        public async Task<IActionResult> UploadPhoto([FromForm] UploadPhotoDto dto)
+        {
+            if (dto.Files.Length <=0)
+                return BadRequest("Fichier invalide");
+
+            // Vérification extension
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png" };
+            foreach (var file in dto.Files)
+            {
+                if(file == null || file.Length == 0)
+                {
+                    return BadRequest("Fichier invalide");
+                }
+
+                var extension = Path.GetExtension(file.FileName).ToLower();
+
+                if (!allowedExtensions.Contains(extension))
+                    return BadRequest("Format non autorisé");
+            }
+
+            // Cette logique sera reporté dans le service après la mise en place de l'authentification.
+
+            var firstUtilisateur = (await _utilisateurService.GetAllAsync()).First();
+
+            // Dossier par intervention
+            var folderPath = Path.Combine("wwwroot/uploads", dto.IdIntervention.ToString());
+
+            if (!Directory.Exists(folderPath))
+                Directory.CreateDirectory(folderPath);
+
+            foreach (var file in dto.Files)
+            {
+                var extension = Path.GetExtension(file.FileName).ToLower();
+
+                var fileName = $"{Guid.NewGuid()}{extension}";
+                var fullPath = Path.Combine(folderPath, fileName);
+
+                // Sauvegarde physique
+                using (var stream = new FileStream(fullPath, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+
+                var url = $"{Request.Scheme}://{Request.Host}/uploads/{dto.IdIntervention}/{fileName}";
+
+                var photo = new PhotoIntervention
+                {
+                    IdPhoto = null,
+                    IdIntervention = dto.IdIntervention,
+                    UrlBlob = url,
+                    TypePhoto = dto.TypePhoto,
+                    DatePrise = dto.DatePrise,
+                    IdUploadeur = firstUtilisateur.IdUtilisateur // à remplacer par ton user
+                };
+            
+                var res = await _interventionService.UploadPhotoInterventionAsync(photo);
+            }
+
+
+            return Ok(true);
+        }
+
+
+        [HttpDelete("RemovePhoto/{idPhotoIntervention}")]
+        public async Task<IActionResult> DeletePhoto(Guid idPhotoIntervention)
+        {
+            await _interventionService.RemovePhotoInterventionAsync(idPhotoIntervention);
+
+            return NoContent();
+        }
+
+        [HttpGet("GetPhotosIntervention/{idIntervention}")]
+        public async Task<IActionResult> GetPhotos(Guid idIntervention) 
+        { 
+            return Ok(await _interventionService.GetAllPhotoInterventionAsync(idIntervention));
+        }
+
+        [HttpPost("ReturnSuccess")]
+        public ActionResult ReturnTrue([FromForm] List<byte[]> demo) 
+        { 
+            return Ok( new { success =  true });
         }
     }
 }

@@ -5,7 +5,7 @@ namespace Domain.Models;
 
 public partial class PhotoIntervention
 {
-    public Guid IdPhoto { get; set; }
+    public Guid? IdPhoto { get; set; }
 
     public Guid IdIntervention { get; set; }
 
@@ -21,4 +21,5 @@ public partial class PhotoIntervention
 
     public decimal? Longitude { get; set; }
 
+    public virtual Utilisateur? Utilisateur { get; set; } = null!;
 }

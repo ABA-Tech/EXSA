@@ -22,9 +22,43 @@ namespace Application.Services
             return await _interventionStore.GetAffectationsAsync(IdIntervention);
         }
 
+        public async Task<IEnumerable<PhotoIntervention>> GetAllPhotoInterventionAsync(Guid idIntervention)
+        {
+            return await _interventionStore.GetPhotoInterventionAsync(idIntervention);
+        }
+
         public async Task RemoveAffectationAsync(AffectationIntervention affectation)
         {
             await _interventionStore.RemoveAffectationAsync(affectation);
+        }
+
+        public async Task RemovePhotoInterventionAsync(Guid idPhotoIntervention)
+        {
+            var photoIntervention = await _interventionStore.GetPhotoInterventionByIdAsync(idPhotoIntervention);
+            if (photoIntervention == null)
+            {
+                throw new ApplicationException("Photo inexistante");
+            }
+
+
+            var fileName = Path.GetFileName(photoIntervention.UrlBlob);
+            var folder = photoIntervention.IdIntervention.ToString();
+
+            var fullPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads", folder, fileName);
+
+            // Supprimer fichier physique
+            if (System.IO.File.Exists(fullPath))
+            {
+                System.IO.File.Delete(fullPath);
+            }
+
+
+            await _interventionStore.DeletePhotoInterventionAsync(photoIntervention);
+        }
+
+        public async Task<bool> UploadPhotoInterventionAsync(PhotoIntervention intervention)
+        {
+            return await _interventionStore.UploadPhotoInterventionAsync(intervention);
         }
     }
 }

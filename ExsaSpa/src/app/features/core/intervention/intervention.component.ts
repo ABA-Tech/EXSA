@@ -1,5 +1,5 @@
-import { Component, signal, ViewChild, OnInit, computed } from '@angular/core';
-import { AffectationIntervention, Intervention, InterventionService } from '../../services/intervention.service';
+import { Component, signal, ViewChild, OnInit, computed, inject } from '@angular/core';
+import { AffectationIntervention, Intervention, InterventionService, PhotoIntervention, UploadPhoto } from '../../services/intervention.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
@@ -20,12 +20,14 @@ import { TextareaModule } from 'primeng/textarea';
 import { ToastModule } from 'primeng/toast';
 import { ToolbarModule } from 'primeng/toolbar';
 import { EmployeService, ReferentielService } from '../../services/employe.service';
-import { ConfirmationService } from 'primeng/api';
+import { ConfirmationService, MessageService } from 'primeng/api';
 import { FieldsetModule } from 'primeng/fieldset';
 import { StepperModule } from 'primeng/stepper';
 import { PickListModule } from 'primeng/picklist';
 import { CardModule } from 'primeng/card';
 import { ChipModule } from 'primeng/chip';
+import { FileUploadModule } from 'primeng/fileupload';
+import { DataViewModule } from 'primeng/dataview';
 
 interface Column {
     field: string;
@@ -36,6 +38,11 @@ interface Column {
 interface ExportColumn {
     title: string;
     dataKey: string;
+}
+
+interface UploadEvent {
+    originalEvent: Event;
+    files: File[];
 }
 
 
@@ -66,11 +73,13 @@ interface ExportColumn {
     StepperModule,
     PickListModule,
     CardModule,
-    ChipModule
+    ChipModule,
+    FileUploadModule,
+    DataViewModule
   ],
   templateUrl: './intervention.component.html',
   styleUrl: './intervention.component.scss',
-  providers: [InterventionService, ReferentielService, ConfirmationService, EmployeService]
+  providers: [InterventionService, ReferentielService, ConfirmationService, EmployeService,MessageService]
 })
 export class InterventionComponent {
 
@@ -81,11 +90,20 @@ export class InterventionComponent {
     displayDetails: boolean = false;
     typeInterventionList: any[] = [];
     statutInterventionList: any[] = [];
+    typePhotoInterventionList: any[] = [];
+    photoUpload!: UploadPhoto;
+
+    uploadedFiles: any[] = [];
+    private messageService = inject(MessageService);
+
 
     sourceEmployeesData = signal<any[]>([]);
     sourceEmployees = signal<any[]>([]);
     targetEmployees = signal<any[]>([]);
     affectationList = signal<AffectationIntervention[]>([]);
+
+    photoInterventionList = signal<PhotoIntervention[]>([]);
+
 
     @ViewChild('dt') dt!: Table;
     exportColumns!: ExportColumn[];
@@ -102,13 +120,13 @@ export class InterventionComponent {
 
     ngOnInit() {
         this.loadData();
+        this.photoUpload = {};
     }
 
     getInterventions() {
         this.interventionService.getAll().subscribe({
             next: (data) => {
                 this.interventionList.set(data);
-                console.log(data);
             },
             error: (err) => {
                 console.error('Error fetching interventions:', err);
@@ -144,6 +162,15 @@ export class InterventionComponent {
             },
             error: (err) => {
                 console.error('Error fetching statut interventions:', err);
+            }
+        });
+
+        this.referentielService.getDataFromEndpoint('GetTypePhotos').subscribe({
+            next: (data) => {
+                this.typePhotoInterventionList = data;
+            },
+            error: (err) => {
+                console.error('Error fetching type photo interventions:', err);
             }
         });
 
@@ -235,10 +262,6 @@ export class InterventionComponent {
      deleteIntervention(intervention: Intervention) {
         this.intervention = { ...intervention };
 
-        console.log(this.intervention);
-
-
-
         this.inerventionDialog = true;
     }
 
@@ -282,6 +305,11 @@ export class InterventionComponent {
         return `${res[2]}-${res[1]}-${res[0]}`;
     }
 
+    getPhotoType(typeCode: string | undefined): string {
+        const type = this.typePhotoInterventionList.find(t => t.code === typeCode);
+        return type ? type.libelle : typeCode || '';
+    }
+
     getInterventionDetails(intervention: Intervention) {
         this.displayDetails = true;
         this.intervention = { ...intervention };
@@ -300,6 +328,7 @@ export class InterventionComponent {
                 console.error('Error fetching employees:', err);
             }
         });
+        this.getPhotosIntervention();
     }
 
     getAffectations(interventionId: string) {
@@ -390,7 +419,7 @@ export class InterventionComponent {
             this.intervention.statut = 'EN_COURS';
             this.updateStatutIntervention();
         }
-        
+
         this.currentNumStep.set(this.currentNumStep() + move);
     }
 
@@ -429,5 +458,62 @@ export class InterventionComponent {
         for (let item of this.targetEmployees()) {
             this.removeAffectation(item);
         }
+    }
+
+    onUpload(event: any) {
+        this.photoUpload.files = event.files;
+        this.EnregistrerPhoto();
+    }
+
+    EnregistrerPhoto() {
+        if(this.photoUpload.datePrise && this.photoUpload.typePhoto && this.photoUpload.files && this.photoUpload.files.length > 0) {
+            this.photoUpload.IdIntervention = this.intervention.idIntervention;
+            this.interventionService.UploadInterventionPhoto(this.photoUpload).subscribe({
+                next: (res) => {
+                    this.messageService.add({ severity: 'success', summary: 'Succès', detail: 'Photo(s) uploadée(s) avec succès.' });
+                    this.getPhotosIntervention();
+                },
+                error: (err) => {
+                    this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Erreur lors de l\'upload de la photo.' });
+                }
+            });
+        }
+    }
+
+    etapeDemarrage(move: number, etat: string = '') {
+        if(move> 0) {
+            this.intervention.statut = etat;
+            this.currentNumStep.set(this.currentNumStep() + move);
+
+            this.updateStatutIntervention();
+        } else {
+            // this.intervention.statut = 'EN_ATTENTE';
+            this.intervention.statut = etat;
+            this.currentNumStep.set(this.currentNumStep() + move);
+            this.updateStatutIntervention();
+        }
+    }
+
+    getPhotosIntervention() {
+        this.interventionService.GetPhotosIntervention(this.intervention.idIntervention!).subscribe({
+            next: (data) => {
+                this.photoInterventionList.set(data);
+            },
+            error: (err) => {
+                console.error('Error fetching intervention photos:', err);
+            }
+        });
+    }
+
+    deletePhoto(photo: PhotoIntervention) {
+        this.interventionService.DeletePhoto(photo.idPhoto!).subscribe({
+            next: () => {
+                this.messageService.add({ severity: 'success', summary: 'Succès', detail: 'Photo supprimée avec succès.' });
+                this.getPhotosIntervention();
+            },
+            error: (err) => {
+                this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Erreur lors de la suppression de la photo.' });
+            }
+        });
     }
 }

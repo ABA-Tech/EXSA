@@ -371,11 +371,105 @@
                 </p-step-panel>
 
 
+                <p-step-panel [value]="4">
+                    <ng-template #content let-activateCallback="activateCallback">
+                        <div class="card">
+                            <p-toast />
+                            <p-fileupload name="demo[]" url="https://localhost:7118/api/Interventions/ReturnSuccess" (onUpload)="onUpload($event)" [multiple]="true" accept="image/*" maxFileSize="1000000" mode="advanced">
+                                <ng-template #empty>
+                                    <div>Drag and drop files to here to upload.</div>
+                                </ng-template>
+                            </p-fileupload>
+                        </div>
+
+                            <div class="flex flex-wrap gap-2 mt-3">
+                                <label for="datePtise" class="block font-bold mb-3">Date de prise</label>
+                                <input
+                                    type="date"
+                                    id="datePtise"
+                                    [(ngModel)]="photoUpload.datePrise"
+                                    required
+                                    style="padding:8px 10px; font-size:12px; border:1px solid #ccc; border-radius:6px; outline:none; background-color:#fff; color:#333; transition:0.3s;"
+                                    />
+                                <span>Type de photo</span>
+                                <p-tag *ngFor="let typePhoto of typePhotoInterventionList" [value]="typePhoto.libelle" (click)="photoUpload.typePhoto = typePhoto.code" [severity]="photoUpload.typePhoto === typePhoto.code ? 'success' : 'secondary'"></p-tag>
+
+                            </div>
+                        <hr class="my-4" />
+                        @if (photoInterventionList().length > 0) {
+                            <div class="card">
+                                <p-dataview #dv [value]="photoInterventionList()" [rows]="5" [paginator]="true">
+                                    <ng-template #list let-items>
+                                        <div class="grid grid-cols-12 gap-4 grid-nogutter">
+                                            <div class="col-span-12" *ngFor="let item of items; let first = first">
+                                                <div class="flex flex-col sm:flex-row sm:items-center p-6 gap-4" [ngClass]="{ 'border-t border-surface-200 dark:border-surface-700': !first }">
+                                                    <div class="md:w-40 relative" style="opacity: 8;">
+                                                        <img class="block xl:block mx-auto rounded-border w-full" [src]="item.urlBlob" [alt]="item.name" />
+                                                        <p-tag [value]="item.typePhoto" [severity]="getSeverity(item)" class="absolute dark:!bg-surface-900" [style.left.px]="4" [style.top.px]="4" />
+                                                    </div>
+                                                    <div class="flex flex-col md:flex-row justify-between md:items-center flex-1 gap-6">
+                                                        <div class="flex flex-row md:flex-col justify-between items-start gap-2">
+                                                            <div>
+                                                                <span class="font-medium text-secondary text-sm">{{ getPhotoType(item.typePhoto) }}</span>
+                                                                <div class="text-lg font-medium text-surface-900 dark:text-surface-0 mt-2">{{ intervention.reference }}</div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="flex flex-col md:items-end gap-8">
+                                                            <span class="text-xl font-semibold text-surface-900 dark:text-surface-0">{{ 'Ajouté par: ' + item.utilisateur?.nomComplet }}</span>
+                                                            <div class="flex flex-row-reverse md:flex-row gap-2">
+                                                                <p-button icon="pi pi-trash" [severity]="'danger'" class="flex-auto md:flex-initial" label="Supprimer" (onClick)="deletePhoto(item)" />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </ng-template>
+                                </p-dataview>
+                            </div>
+                        }
+                        <div class="flex pt-6 justify-between">
+                            <p-button label="Précédent" severity="secondary" icon="pi pi-arrow-left" (onClick)="etapeDemarrage(-1, 'EN_ATTENTE')" />
+                            <p-button label="Terminé" icon="pi pi-arrow-right" iconPos="right" (onClick)="etapeDemarrage(1, 'TERMINEE')" />
+                        </div>
+                    </ng-template>
+                </p-step-panel>
+
+
+                <p-step-panel [value]="5">
+                    <ng-template #content let-activateCallback="activateCallback">
+                        <div class="card">
+                            <p-toast />
+                            <p-fileupload name="demo[]" url="https://localhost:7118/api/Interventions/ReturnSuccess" (onUpload)="onUpload($event)" [multiple]="true" accept="image/*" maxFileSize="1000000" mode="advanced">
+                                <ng-template #empty>
+                                    <div>Drag and drop files to here to upload.</div>
+                                </ng-template>
+                            </p-fileupload>
+                        </div>
+
+                            <div class="flex flex-wrap gap-2 mt-3">
+                                <label for="datePtise" class="block font-bold mb-3">Date de prise</label>
+                                <input
+                                    type="date"
+                                    id="datePtise"
+                                    [(ngModel)]="photoUpload.datePrise"
+                                    required
+                                    style="padding:8px 10px; font-size:12px; border:1px solid #ccc; border-radius:6px; outline:none; background-color:#fff; color:#333; transition:0.3s;"
+                                    />
+                                <span>Type de photo</span>
+                                <p-tag *ngFor="let typePhoto of typePhotoInterventionList" [value]="typePhoto.libelle" (click)="photoUpload.typePhoto = typePhoto.code" [severity]="photoUpload.typePhoto === typePhoto.code ? 'success' : 'secondary'"></p-tag>
+
+                            </div>
+                        <div class="flex pt-6 justify-between">
+                            <!-- <p-button label="Précédent" severity="secondary" icon="pi pi-arrow-left" (onClick)="etapeDemarrage(-1, 'EN_COURS')" /> -->
+                            <p-button label="Valider" icon="pi pi-arrow-right" iconPos="right" (onClick)="etapeDemarrage(1, 'VALIDEE')" />
+                        </div>
+                    </ng-template>
+                </p-step-panel>
+
             </p-step-panels>
         </p-stepper>
     </div>
 }
-
-
 
 

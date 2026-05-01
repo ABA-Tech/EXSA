@@ -79,5 +79,32 @@ namespace Infrastructure.Stores
 
             return entity.ToModel();
         }
+
+        public async Task<IEnumerable<PhotoIntervention>> GetPhotoInterventionAsync(Guid idIntervention)
+        {
+            return (await _dbContext.PHOTO_INTERVENTIONs.Include(x => x.ID_UPLOADEURNavigation).Where(x=>x.ID_INTERVENTION==idIntervention).ToListAsync()).ToModelCollection();
+        }
+
+        public async Task DeletePhotoInterventionAsync(PhotoIntervention photoIntervention)
+        {
+            var entity = photoIntervention.ToEntity();
+            _dbContext.PHOTO_INTERVENTIONs.Remove(entity);
+
+            await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task<bool> UploadPhotoInterventionAsync(PhotoIntervention intervention)
+        {
+            var entity = intervention.ToEntity();
+            _dbContext.PHOTO_INTERVENTIONs.Add(entity);
+
+            var res = await _dbContext.SaveChangesAsync();
+            return res > 0;
+        }
+
+        public async Task<PhotoIntervention?> GetPhotoInterventionByIdAsync(Guid idPhotoIntervention)
+        {
+            return (await _dbContext.PHOTO_INTERVENTIONs.Include(x=>x.ID_UPLOADEURNavigation).AsNoTracking().FirstOrDefaultAsync(x => x.ID_PHOTO == idPhotoIntervention))?.ToModel();
+        }
     }
 }

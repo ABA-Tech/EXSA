@@ -1,6 +1,7 @@
 import { Injectable } from "@angular/core";
 import { ApiService } from "./api.service";
 import { Observable } from "rxjs";
+import { Utilisateur } from "./employe.service";
 
 export interface Intervention {
   idIntervention?: string;
@@ -38,11 +39,29 @@ export interface AffectationIntervention {
   estPrincipal?: boolean;
 }
 
-
 export interface RefStatutIntervention {
     code: string;
     libelle: string;
     ordre: number;
+}
+
+export interface UploadPhoto {
+    files?: File[];
+    typePhoto?: string;
+    IdIntervention?: string;
+    datePrise?: string;
+}
+
+export interface PhotoIntervention {
+  idPhoto?: string;
+  idIntervention?: string;
+  urlBlob?: string;
+  typePhoto?: string;
+  datePrise?: string;
+  idUploadeur?: string;
+  latitude?: number;
+  longitude?: number;
+  utilisateur?: Utilisateur;
 }
 
 @Injectable()
@@ -68,4 +87,25 @@ export class InterventionService extends ApiService<Intervention> {
         return this.httpClient.put<AffectationIntervention[]>(`${this.baseUrl}/Interventions/UpdateStatutIntervention/${idIntervention}?statutIntervention=${statutIntervention}`, null);
     }
 
+    UploadInterventionPhoto(uploadPhoto: UploadPhoto): Observable<void> {
+        const formData = new FormData();
+        uploadPhoto.files?.forEach(file => {
+            formData.append('Files', file);
+        });
+
+        // Ajouter les autres champs
+        formData.append('IdIntervention', uploadPhoto.IdIntervention ?? "");
+
+        formData.append('DatePrise', uploadPhoto.datePrise ?? "");
+        formData.append('TypePhoto', uploadPhoto?.typePhoto ?? "");
+        return this.httpClient.post<void>(`${this.baseUrl}/Interventions/uploadPhotos`, formData);
+    }
+
+    GetPhotosIntervention(idIntervention: string): Observable<PhotoIntervention[]> {
+        return this.httpClient.get<PhotoIntervention[]>(`${this.baseUrl}/Interventions/GetPhotosIntervention/${idIntervention}`);
+    }
+
+    DeletePhoto(idPhoto: string): Observable<any> {
+        return this.httpClient.delete<any>(`${this.baseUrl}/Interventions/RemovePhoto/${idPhoto}`);
+    }
 }
