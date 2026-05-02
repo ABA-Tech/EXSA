@@ -4,13 +4,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Data.Entities;
 
-public partial class ExsaDbContext : DbContext
+public partial class ExsaDbContextOld : DbContext
 {
-    public ExsaDbContext()
+    public ExsaDbContextOld()
     {
     }
 
-    public ExsaDbContext(DbContextOptions<ExsaDbContext> options)
+    public ExsaDbContextOld(DbContextOptions<ExsaDbContextOld> options)
         : base(options)
     {
     }
@@ -18,8 +18,6 @@ public partial class ExsaDbContext : DbContext
     public virtual DbSet<AFFECTATION_INTERVENTION> AFFECTATION_INTERVENTIONs { get; set; }
 
     public virtual DbSet<ARTICLE_STOCK> ARTICLE_STOCKs { get; set; }
-
-    public virtual DbSet<DEPENSE_INTERVENTION> DEPENSE_INTERVENTIONs { get; set; }
 
     public virtual DbSet<EMPLOYE> EMPLOYEs { get; set; }
 
@@ -37,8 +35,6 @@ public partial class ExsaDbContext : DbContext
 
     public virtual DbSet<POSITION_GP> POSITION_GPs { get; set; }
 
-    public virtual DbSet<REF_CATEGORIE_DEPENSE> REF_CATEGORIE_DEPENSEs { get; set; }
-
     public virtual DbSet<REF_ROLE> REF_ROLEs { get; set; }
 
     public virtual DbSet<REF_STATUT_FACTURE> REF_STATUT_FACTUREs { get; set; }
@@ -46,8 +42,6 @@ public partial class ExsaDbContext : DbContext
     public virtual DbSet<REF_STATUT_INTERVENTION> REF_STATUT_INTERVENTIONs { get; set; }
 
     public virtual DbSet<REF_TYPE_CONTRAT> REF_TYPE_CONTRATs { get; set; }
-
-    public virtual DbSet<REF_TYPE_DEPENSE_INTERVENTION> REF_TYPE_DEPENSE_INTERVENTIONs { get; set; }
 
     public virtual DbSet<REF_TYPE_INTERVENTION> REF_TYPE_INTERVENTIONs { get; set; }
 
@@ -111,43 +105,6 @@ public partial class ExsaDbContext : DbContext
                 .HasForeignKey(d => d.ID_LOCATAIRE)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_ARTICLE_LOCATAIRE");
-        });
-
-        modelBuilder.Entity<DEPENSE_INTERVENTION>(entity =>
-        {
-            entity.HasKey(e => e.ID_DEPENSE).HasName("PK__DEPENSE___AE892F857DDEE58E");
-
-            entity.ToTable("DEPENSE_INTERVENTION");
-
-            entity.Property(e => e.ID_DEPENSE).HasDefaultValueSql("(newsequentialid())");
-            entity.Property(e => e.DATE_CREATION).HasColumnType("datetime");
-            entity.Property(e => e.DATE_DEPENSE).HasColumnType("datetime");
-            entity.Property(e => e.MONTANT_XAF).HasColumnType("decimal(15, 2)");
-            entity.Property(e => e.NOTE)
-                .HasMaxLength(2000)
-                .IsUnicode(false);
-            entity.Property(e => e.REFERENCE)
-                .HasMaxLength(20)
-                .IsUnicode(false);
-            entity.Property(e => e.TYPE_DEPENSE).HasMaxLength(20);
-
-            entity.HasOne(d => d.ID_EMPLOYENavigation).WithMany(p => p.DEPENSE_INTERVENTIONs)
-                .HasForeignKey(d => d.ID_EMPLOYE)
-                .HasConstraintName("FK_DEPENSE_EMPLOYE");
-
-            entity.HasOne(d => d.ID_INTERVENTIONNavigation).WithMany(p => p.DEPENSE_INTERVENTIONs)
-                .HasForeignKey(d => d.ID_INTERVENTION)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_DEPENSE_INTERVENTION");
-
-            entity.HasOne(d => d.ID_SAISIE_PARNavigation).WithMany(p => p.DEPENSE_INTERVENTIONs)
-                .HasForeignKey(d => d.ID_SAISIE_PAR)
-                .HasConstraintName("FK_DEPENSE_UTILISATEUR");
-
-            entity.HasOne(d => d.TYPE_DEPENSENavigation).WithMany(p => p.DEPENSE_INTERVENTIONs)
-                .HasForeignKey(d => d.TYPE_DEPENSE)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_DEPENSE_TYPE_DEPENSE");
         });
 
         modelBuilder.Entity<EMPLOYE>(entity =>
@@ -364,9 +321,6 @@ public partial class ExsaDbContext : DbContext
             entity.ToTable("PHOTO_INTERVENTION");
 
             entity.Property(e => e.ID_PHOTO).HasDefaultValueSql("(newsequentialid())");
-            entity.Property(e => e.COMMENTAIRE)
-                .HasMaxLength(2000)
-                .IsUnicode(false);
             entity.Property(e => e.LATITUDE).HasColumnType("decimal(10, 7)");
             entity.Property(e => e.LONGITUDE).HasColumnType("decimal(10, 7)");
             entity.Property(e => e.TYPE_PHOTO)
@@ -410,19 +364,6 @@ public partial class ExsaDbContext : DbContext
                 .HasConstraintName("FK_POSITION_UTILISATEUR");
         });
 
-        modelBuilder.Entity<REF_CATEGORIE_DEPENSE>(entity =>
-        {
-            entity.HasKey(e => e.CODE).HasName("PK__REF_CATE__AA1D4378FA78616B");
-
-            entity.ToTable("REF_CATEGORIE_DEPENSE");
-
-            entity.Property(e => e.CODE).HasMaxLength(20);
-            entity.Property(e => e.ACTIF)
-                .IsRequired()
-                .HasDefaultValueSql("((1))");
-            entity.Property(e => e.LIBELLE).HasMaxLength(100);
-        });
-
         modelBuilder.Entity<REF_ROLE>(entity =>
         {
             entity.HasKey(e => e.CODE).HasName("PK__REF_ROLE__AA1D4378C93CC60E");
@@ -458,16 +399,6 @@ public partial class ExsaDbContext : DbContext
             entity.HasKey(e => e.CODE).HasName("PK__REF_TYPE__AA1D437894C08930");
 
             entity.ToTable("REF_TYPE_CONTRAT");
-
-            entity.Property(e => e.CODE).HasMaxLength(20);
-            entity.Property(e => e.LIBELLE).HasMaxLength(100);
-        });
-
-        modelBuilder.Entity<REF_TYPE_DEPENSE_INTERVENTION>(entity =>
-        {
-            entity.HasKey(e => e.CODE).HasName("PK__REF_TYPE__AA1D4378F88DB337");
-
-            entity.ToTable("REF_TYPE_DEPENSE_INTERVENTION");
 
             entity.Property(e => e.CODE).HasMaxLength(20);
             entity.Property(e => e.LIBELLE).HasMaxLength(100);

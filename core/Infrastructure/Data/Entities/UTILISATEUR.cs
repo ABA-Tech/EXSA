@@ -33,6 +33,8 @@ public partial class UTILISATEUR
 
     public virtual ICollection<AFFECTATION_INTERVENTION> AFFECTATION_INTERVENTIONs { get; set; } = new List<AFFECTATION_INTERVENTION>();
 
+    public virtual ICollection<DEPENSE_INTERVENTION> DEPENSE_INTERVENTIONs { get; set; } = new List<DEPENSE_INTERVENTION>();
+
     public virtual ICollection<EMPLOYE> EMPLOYEs { get; set; } = new List<EMPLOYE>();
 
     public virtual LOCATAIRE ID_LOCATAIRENavigation { get; set; } = null!;

@@ -21,6 +21,8 @@ public partial class PHOTO_INTERVENTION
 
     public decimal? LONGITUDE { get; set; }
 
+    public string? COMMENTAIRE { get; set; }
+
     public virtual INTERVENTION ID_INTERVENTIONNavigation { get; set; } = null!;
 
     public virtual UTILISATEUR ID_UPLOADEURNavigation { get; set; } = null!;

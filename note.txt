@@ -1,0 +1,6 @@
+dotnet ef dbcontext scaffold Name=ConnectionStrings:Default Microsoft.EntityFrameworkCore.SqlServer   -o Models   --context-dir Data   -c MonDbContext   --use-database-names   --no-pluralize   --force
+
+
+
+
+Scaffold-DbContext "Name=ConnectionStrings:Default Microsoft.EntityFrameworkCore.SqlServer  -OutputDir Models  -ContextDir Data   -Context MonDbContext  -UseDatabaseNames  -Force

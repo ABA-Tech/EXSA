@@ -27,6 +27,8 @@ public partial class EMPLOYE
 
     public DateTime? DATE_MODIFICATION { get; set; }
 
+    public virtual ICollection<DEPENSE_INTERVENTION> DEPENSE_INTERVENTIONs { get; set; } = new List<DEPENSE_INTERVENTION>();
+
     public virtual LOCATAIRE ID_LOCATAIRENavigation { get; set; } = null!;
 
     public virtual UTILISATEUR? ID_UTILISATEURNavigation { get; set; }
