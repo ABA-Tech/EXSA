@@ -136,7 +136,7 @@
                 </div>
                 <div class="col-span-3">
                     <label for="dateEmbauche" class="block font-bold mb-3">Date d'embauche</label>
-                    <p-datepicker [showIcon]="true" [showButtonBar]="false" [(ngModel)]="createEmpDto.dateEmbauche" dateFormat="dd/mm/yy"></p-datepicker>
+                    <p-datepicker [showIcon]="true" [showButtonBar]="false" [(ngModel)]="createEmpDto.dateEmbauche"></p-datepicker>
                     <small class="text-red-500" *ngIf="submitted && !createEmpDto.dateEmbauche">La date d'embauche est requise.</small>
                 </div>
                 <div class="col-span-4">

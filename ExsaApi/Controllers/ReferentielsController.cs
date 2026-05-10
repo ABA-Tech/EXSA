@@ -62,5 +62,11 @@ namespace ExsaApi.Controllers
         {
             return Ok(await _referentielService.GetAllStatutInterventionsAsync());
         }
+
+        [HttpGet("GetTypesDepenseInterventions")]
+        public async Task<IActionResult> GetTypesDepenseInterventions()
+        {
+            return Ok(await _referentielService.GetAllTypeDepenseInterventionAsync());
+        }
     }
 }

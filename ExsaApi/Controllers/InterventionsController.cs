@@ -211,10 +211,30 @@ namespace ExsaApi.Controllers
             return Ok(await _interventionService.GetAllPhotoInterventionAsync(idIntervention));
         }
 
+        [HttpPost("SaisieDepenseIntervention")]
+        public async Task<IActionResult> GetPhotos(SaisieDepenseInterventionDto depense) 
+        { 
+            return Ok(await _interventionService.CreateDepenseInterventionAsync(depense));
+        }
+
         [HttpPost("ReturnSuccess")]
         public ActionResult ReturnTrue([FromForm] List<byte[]> demo) 
         { 
             return Ok( new { success =  true });
+        }
+
+
+        [HttpGet("GetGrilleRationTransport/{idIntervention}")]
+        public async Task<IActionResult> GetGrilleRationTransport(Guid idIntervention)
+        {
+            return Ok(await _interventionService.GetGrilleRationTransportAsync(idIntervention));
+        }
+
+
+        [HttpPatch("PatchDepenseIntervention/{idIntervention}")]
+        public async Task<IActionResult> PatchDepenseIntervention(Guid idIntervention, PathDepenseInterventionDto pathDepense)
+        {
+            return Ok(await _interventionService.UpdateDepenseIntervention(idIntervention, pathDepense));
         }
     }
 }

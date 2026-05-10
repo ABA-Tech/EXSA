@@ -1,4 +1,5 @@
 ﻿using Domain.Models;
+using Domain.Models.Dto;
 
 namespace Domain.Services
 {
@@ -11,5 +12,10 @@ namespace Domain.Services
         Task<IEnumerable<PhotoIntervention>> GetAllPhotoInterventionAsync(Guid idIntervention);
         Task RemovePhotoInterventionAsync(Guid idPhotoIntervention);
         Task<bool> UploadPhotoInterventionAsync(PhotoIntervention intervention);
+
+        Task<bool> CreateDepenseInterventionAsync(SaisieDepenseInterventionDto saisieDepenseIntervention);
+
+        Task<RationTransportGridDto> GetGrilleRationTransportAsync(Guid idIntervention);
+        Task<bool> UpdateDepenseIntervention(Guid idIntervention, PathDepenseInterventionDto depenseInterventionDto);
     }
 }

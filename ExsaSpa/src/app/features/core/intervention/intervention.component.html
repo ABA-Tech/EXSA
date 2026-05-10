@@ -1,5 +1,5 @@
 
-<p-toolbar styleClass="mb-6">
+<p-toolbar styleClass="">
     <ng-template #start>
         <p-button label="New" icon="pi pi-plus" severity="secondary" class="mr-2" (click)="openNew()" />
         <!-- <p-button severity="secondary" label="Delete" icon="pi pi-trash" outlined (onClick)="deleteSelectedinterventions()" [disabled]="!selectedinterventions || !selectedinterventions.length" /> -->
@@ -17,7 +17,6 @@
     [columns]="cols"
     [paginator]="true"
     [globalFilterFields]="['name', 'country.name', 'representative.name', 'status']"
-    [tableStyle]="{ 'min-width': '75rem' }"
     [rowHover]="true"
     dataKey="id"
     currentPageReportTemplate="Showing {first} to {last} of {totalRecords} interventions"
@@ -35,7 +34,7 @@
     </ng-template>
     <ng-template #header>
         <tr>
-            <th style="width: 3rem">
+            <th>
                 <input type="checkbox" checked="true" disabled="true"/>
             </th>
             <!-- <th style="min-width: 16rem">Code</th> -->
@@ -65,7 +64,7 @@
     </ng-template>
     <ng-template #body let-intervention>
         <tr>
-            <td style="width: 3rem">
+            <td>
                 <i class="pi pi-arrow-up-right" style="cursor: pointer;" (click)="getInterventionDetails(intervention)"></i>
             </td>
             <td>{{ intervention.reference }}</td>
@@ -80,7 +79,8 @@
             <td>{{ intervention.dateDebut | date }}</td>
 
             <td>
-                <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" (click)="editIntervention(intervention)" />
+                <p-button icon="pi pi-pencil" class="mr-2" text="Modifier" [rounded]="true" [outlined]="true" (click)="editIntervention(intervention)" />
+                <p-button icon="pi pi-pencil" class="mr-2" text="Dépenses" [rounded]="true" [outlined]="true" (click)="getDepenses(intervention)" />
                 <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (click)="deleteIntervention(intervention)" />
             </td>
         </tr>
@@ -182,7 +182,7 @@
 <p-confirmdialog [style]="{ width: '450px' }" />
 
 
-@if (intervention) {
+@if (intervention && displayDetails) {
     <!-- Ici, on va mettre un composant  -->
     <div class="card  mt-5">
         <p-stepper [value]="currentNumStep()" class="basis-[50rem]" [linear]="true">
@@ -472,4 +472,11 @@
     </div>
 }
 
+@if (intervention && displayDepense() && affectationList().length > 0) {
 
+    <app-frais-techniciens
+        [intervention]="intervention"
+        [techniciens]="affectationList()"
+        (refreshIntervention)="getInterventionDetails(intervention)"
+    ></app-frais-techniciens>
+}

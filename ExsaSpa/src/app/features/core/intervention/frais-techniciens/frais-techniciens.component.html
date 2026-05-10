@@ -1,0 +1,403 @@
+<!-- <div class="page">
+  <section class="summary">
+    <div class="summary-card ration">
+      <span>Rations</span>
+      <strong>{{ formatXaf(totalKind('ration')) }}</strong>
+    </div>
+
+    <div class="summary-card transport">
+      <span>Transport</span>
+      <strong>{{ formatXaf(totalKind('transport')) }}</strong>
+    </div>
+
+    <div class="summary-card total">
+      <span>Total</span>
+      <strong>{{ formatXaf(grandTotal()) }}</strong>
+    </div>
+  </section>
+
+  <section class="add-day">
+    <label>Ajouter un jour :</label>
+
+    <p-datepicker
+      [(ngModel)]="selectedDate"
+      dateFormat="dd/mm/yy"
+      [showIcon]="true"
+      inputId="dayPicker"
+      styleClass="date-picker">
+    </p-datepicker>
+
+    <div class="add-day-actions">
+      <p-button
+        label="Ajouter ce jour"
+        icon="pi pi-plus"
+        severity="secondary"
+        [outlined]="true"
+        (onClick)="addDay()">
+      </p-button>
+
+      <span>Les colonnes s’ajoutent au fil des jours saisis.</span>
+    </div>
+  </section>
+
+  <p-table
+    [value]="technicians"
+    styleClass="expense-table"
+    [tableStyle]="{ 'min-width': '900px' }">
+
+    <ng-template pTemplate="header">
+      <tr>
+        <th rowspan="2" class="technician-col">Technicien</th>
+
+        <th *ngFor="let day of days" class="day-col">
+          <div class="day-header">
+            <span>{{ dayTitle(day.date) }}</span>
+
+            <button
+              type="button"
+              class="remove-day"
+              (click)="removeDay(day.key)">
+              ×
+            </button>
+          </div>
+        </th>
+
+        <th rowspan="2" class="subtotal-col">Sous-total</th>
+      </tr>
+
+      <tr>
+        <th *ngFor="let day of days" class="legend-col">
+          <div class="legend">
+            <span>
+              <i class="dot ration-dot"></i>
+              Ration
+            </span>
+
+            <span>
+              <i class="dot transport-dot"></i>
+              Transport
+            </span>
+
+            <span>XAF</span>
+          </div>
+        </th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-technician>
+      <tr class="tech-row">
+        <td rowspan="2" class="technician-cell">
+          <div class="technician">
+            <span class="avatar">{{ technician.initials }}</span>
+            <strong>{{ technician.name }}</strong>
+          </div>
+        </td>
+
+        <td *ngFor="let day of days" class="amount-cell">
+          <i class="dot ration-dot"></i>
+
+          <p-inputNumber
+            [(ngModel)]="technician.entries[day.key].ration"
+            [min]="0"
+            [useGrouping]="true"
+            placeholder="—"
+            inputStyleClass="amount-input">
+          </p-inputNumber>
+        </td>
+
+        <td class="subtotal ration-text">
+          {{ totalTechnician(technician, 'ration') | number:'1.0-0' }}
+        </td>
+      </tr>
+
+      <tr class="tech-row second">
+        <td *ngFor="let day of days" class="amount-cell">
+          <i class="dot transport-dot"></i>
+
+          <p-inputNumber
+            [(ngModel)]="technician.entries[day.key].transport"
+            [min]="0"
+            [useGrouping]="true"
+            placeholder="—"
+            inputStyleClass="amount-input">
+          </p-inputNumber>
+        </td>
+
+        <td class="subtotal transport-text">
+          {{ totalTechnician(technician, 'transport') | number:'1.0-0' }}
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+      <tr class="footer-row">
+        <td rowspan="2" class="footer-title">Total / jour</td>
+
+        <td *ngFor="let day of days" class="day-total ration-text">
+          {{ totalDay(day.key, 'ration') | number:'1.0-0' }}
+        </td>
+
+        <td rowspan="2" class="grand-total">
+          {{ formatXaf(grandTotal()) }}
+        </td>
+      </tr>
+
+      <tr class="footer-row">
+        <td *ngFor="let day of days" class="day-total transport-text">
+          {{ totalDay(day.key, 'transport') | number:'1.0-0' }}
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+
+  <footer class="actions">
+    <div class="caption">
+      <span><i class="dot ration-dot"></i> Ration</span>
+      <span><i class="dot transport-dot"></i> Transport</span>
+      <em>Champ vide = non renseigné ≠ zéro</em>
+    </div>
+
+    <div class="buttons">
+      <p-button
+        label="Réinitialiser"
+        severity="secondary"
+        [outlined]="true"
+        (onClick)="reset()">
+      </p-button>
+
+      <p-button
+        label="Enregistrer"
+        [disabled]="!hasData()"
+        (onClick)="save()">
+      </p-button>
+    </div>
+  </footer>
+</div> -->
+
+<p-toast />
+@if (isFormulaire) {
+    <p-fluid >
+        <p-toast />
+        <div class="flex mt-8">
+            <div class="card flex flex-col gap-6 w-full">
+                <div class=" w-full">
+                    <p-toolbar>
+                        <ng-template #start>
+                            <div class="font-semibold text-xl">Ajout d'une dépense</div>
+                        </ng-template>
+                        <ng-template #end>
+                            <p-button label="Annuler" class="mr-3" severity="secondary" (onClick)="reset()"/>
+                            <p-button label="Enregistrer" (onClick)="enregistrerNouvelleSaisie()"/>
+                        </ng-template>
+                    </p-toolbar>
+                </div>
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="flex flex-wrap gap-2 w-full">
+                        <label class="mb-2 font-bold block" for="employe">Choisir les intervenannts</label>
+                        <p-multiselect
+                            [options]="techniciens()"
+                            [(ngModel)]="saisieDepense.techniciens"
+                            optionLabel="technicien.nomComplet"
+                            placeholder="Choisir les intervenants"
+                            [maxSelectedLabels]="3" class="w-full md:w-80" />
+
+                        <small class="text-red-500" *ngIf="submitted && !saisieDepense.techniciens">Vous devez chosir les intervenans</small>
+                    </div>
+                    <div class="flex flex-wrap gap-2 w-full">
+                        <label class="font-bold block" for="typeDepense">Choisir le type de dépense</label>
+                        <p-select
+                            [options]="typeDepense()"
+                            [(ngModel)]="saisieDepense.typeDepenseIntervention"
+                            optionLabel="libelle"
+                            placeholder="types de dépense"
+                            class="w-full md:w-56" />
+
+                        <small class="text-red-500" *ngIf="submitted && !saisieDepense.typeDepenseIntervention">Vous devez chosir un type de dépense</small>
+                    </div>
+
+
+                </div>
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="flex flex-wrap gap-2 w-full">
+                        <label for="code" class="block font-bold mb-3">Code</label>
+                        <input type="code" min="0" max="5" pInputText id="code" placeholder="INT-0515" [(ngModel)]="saisieDepense.reference" required fluid />
+                        <small class="text-red-500" *ngIf="submitted && !saisieDepense.reference">La saisie du code est obligatoire</small>
+                    </div>
+                    <div class="flex flex-wrap gap-2 w-full">
+                        <label class="font-bold block" for="montant">Montant</label>
+                        <p-inputnumber inputId="montant" [(ngModel)]="saisieDepense.montant" class="w-full md:w-56"/>
+                        <small class="text-red-500" *ngIf="submitted && !saisieDepense.montant">La saisie du montant est obligatoire</small>
+                    </div>
+                    <div class="flex flex-wrap gap-2 w-full">
+                        <label class=" mb-2font-bold block" for="date">Date</label>
+                        <p-datepicker class="w-full" [(ngModel)]="saisieDepense.date"></p-datepicker>
+                        <small class="text-red-500" *ngIf="submitted && !saisieDepense.date">Vous devez renseigner une date</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </p-fluid>
+
+} @else {
+
+    <div class="ration-transport-card mt-4" *ngIf="grilleDepenses()">
+    <div class="toolbar">
+        <div>
+        <h3>Ration & transport</h3>
+        <p>Suivi des frais par jour et par technicien</p>
+        </div>
+
+        <button
+        pButton
+        type="button"
+        label="Ajouter une dépense"
+        icon="pi pi-plus"
+        class="p-button-sm"
+        (click)="addDepense()">
+        </button>
+    </div>
+
+    <p-table
+        [value]="grilleDepenses().jours!"
+        [scrollable]="true"
+        scrollHeight="flex"
+        styleClass="p-datatable-sm ration-transport-table">
+
+        <ng-template pTemplate="header">
+        <tr>
+            <th class="date-column">
+            <div class="date-header">
+                <i class="pi pi-calendar"></i>
+                <span>Date</span>
+            </div>
+            </th>
+
+            <th
+            *ngFor="let tech of grilleDepenses().techniciens; trackBy: trackByTech"
+            class="tech-column">
+
+            <div class="tech-header">
+                <div class="avatar">
+                {{ tech.initiales }}
+                </div>
+
+                <div class="tech-name">
+                {{ tech.nomComplet }}
+                </div>
+
+                <div class="expense-legend">
+                <span>
+                    <i class="dot dot-ration"></i>
+                    Ration
+                </span>
+
+                <span>
+                    <i class="dot dot-transport"></i>
+                    Transport
+                </span>
+                </div>
+            </div>
+            </th>
+
+            <th class="subtotal-column">
+            Sous-total<br />
+            / jour
+            </th>
+        </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-jour>
+        <!-- Ligne Ration -->
+        <tr class="jour-row ration-row">
+            <td class="date-cell" rowspan="2">
+            <div class="date-box">
+                <strong>{{ jour.libelleJour }}</strong>
+                <span>{{ jour.libelleDate }}</span>
+            </div>
+            </td>
+
+            <td
+            *ngFor="let cell of jour.cellules; trackBy: trackByCell"
+            class="amount-cell">
+
+            <div class="input-line">
+                <span>
+                    <i class="dot dot-ration"></i>
+                </span>
+                <p-inputNumber
+                [(ngModel)]="cell.montantRation"
+                mode="decimal"
+                [min]="0"
+                [useGrouping]="true"
+                [inputStyleClass]="'amount-input'"
+                placeholder="—"
+                (ngModelChange)="onMontantChange(cell, 'RATION')">
+                </p-inputNumber>
+            </div>
+            </td>
+
+            <td class="subtotal-cell ration-total">
+            {{ jour.sousTotalRationsJour | number:'1.0-0' }}
+            </td>
+        </tr>
+
+        <!-- Ligne Transport -->
+        <tr class="jour-row transport-row">
+            <td
+            *ngFor="let cell of jour.cellules; trackBy: trackByCell"
+            class="amount-cell">
+
+            <div class="input-line">
+                <span>
+                    <i class="dot dot-transport"></i>
+                </span>
+                <p-inputNumber
+                [(ngModel)]="cell.montantTransport"
+                mode="decimal"
+                [min]="0"
+                [useGrouping]="true"
+                [inputStyleClass]="'amount-input'"
+                placeholder="—"
+                (ngModelChange)="onMontantChange(cell, 'TRANSPORT')">
+                </p-inputNumber>
+            </div>
+            </td>
+
+            <td class="subtotal-cell transport-total">
+            {{ jour.sousTotalTransportJour | number:'1.0-0' }}
+            </td>
+        </tr>
+        </ng-template>
+
+        <ng-template pTemplate="footer">
+        <tr class="footer-row">
+            <td class="footer-label">
+            Sous-total<br />
+            / technicien
+            </td>
+
+            <td
+            *ngFor="let tech of grilleDepenses().techniciens; trackBy: trackByTech"
+            class="tech-total-cell">
+
+            <ng-container *ngIf="getSousTotalTech(tech.idEmploye) as total">
+                <div class="tech-total-line ration-total">
+                {{ total.sousTotalRations | number:'1.0-0' }}
+                </div>
+
+                <div class="tech-total-line transport-total">
+                {{ total.sousTotalTransport | number:'1.0-0' }}
+                </div>
+            </ng-container>
+            </td>
+
+            <td class="grand-total-cell">
+            {{ grilleDepenses().grandTotal | number:'1.0-0' }} {{ grilleDepenses().devise }}
+            </td>
+        </tr>
+        </ng-template>
+    </p-table>
+    </div>
+
+}
+

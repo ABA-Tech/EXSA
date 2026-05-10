@@ -59,6 +59,12 @@ namespace Infrastructure.Stores
                 .Select(x=> new RefTypeContrat { Code = x.CODE, Libelle = x.LIBELLE });
         }
 
+        public async Task<IEnumerable<RefTypeeDepenseIntervention>> GetTypeDepenseInterventionsAsync()
+        {
+            return (await _context.REF_TYPE_DEPENSE_INTERVENTIONs.OrderBy(x=>x.CODE).ToListAsync())
+                .Select(x=> new RefTypeeDepenseIntervention { Code = x.CODE, Libelle =x.LIBELLE });
+        }
+
         public async Task<IEnumerable<RefTypeMouvement>> GetTypeMouvementsAsync()
         {
             return (await _context.REF_TYPE_MOUVEMENTs.ToListAsync())

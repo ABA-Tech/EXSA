@@ -51,5 +51,10 @@ namespace Application.Services
         {
             return await _referentielStore.GetTypePlansAsync();
         }
+
+        public async Task<IEnumerable<RefTypeeDepenseIntervention>> GetAllTypeDepenseInterventionAsync()
+        {
+            return await _referentielStore.GetTypeDepenseInterventionsAsync();
+        }
     }
 }

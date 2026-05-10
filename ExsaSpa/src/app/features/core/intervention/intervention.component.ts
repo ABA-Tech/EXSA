@@ -28,6 +28,8 @@ import { CardModule } from 'primeng/card';
 import { ChipModule } from 'primeng/chip';
 import { FileUploadModule } from 'primeng/fileupload';
 import { DataViewModule } from 'primeng/dataview';
+import { FraisTechniciensComponent } from "./frais-techniciens/frais-techniciens.component";
+import { RationTransportGridDto } from '../../models/RationTransportGridDto';
 
 interface Column {
     field: string;
@@ -75,8 +77,9 @@ interface UploadEvent {
     CardModule,
     ChipModule,
     FileUploadModule,
-    DataViewModule
-  ],
+    DataViewModule,
+    FraisTechniciensComponent
+],
   templateUrl: './intervention.component.html',
   styleUrl: './intervention.component.scss',
   providers: [InterventionService, ReferentielService, ConfirmationService, EmployeService,MessageService]
@@ -88,6 +91,7 @@ export class InterventionComponent {
     intervention!: Intervention;
     submitted: boolean = false;
     displayDetails: boolean = false;
+    displayDepense= signal<boolean>(false);
     typeInterventionList: any[] = [];
     statutInterventionList: any[] = [];
     typePhotoInterventionList: any[] = [];
@@ -97,6 +101,7 @@ export class InterventionComponent {
     private messageService = inject(MessageService);
 
 
+    grilleDepense = signal<RationTransportGridDto>({});
     sourceEmployeesData = signal<any[]>([]);
     sourceEmployees = signal<any[]>([]);
     targetEmployees = signal<any[]>([]);
@@ -175,6 +180,7 @@ export class InterventionComponent {
         });
 
         this.displayDetails = false;
+        this.displayDepense.set(false);
     }
 
      editIntervention(intervention: Intervention) {
@@ -312,6 +318,7 @@ export class InterventionComponent {
 
     getInterventionDetails(intervention: Intervention) {
         this.displayDetails = true;
+        this.displayDepense.set(false);
         this.intervention = { ...intervention };
         this.intervention.dateDebut = new Date(intervention.dateDebut!).toLocaleDateString('fr-FR');
         this.intervention.dateFin = new Date(intervention.dateFin!).toLocaleDateString('fr-FR');
@@ -336,6 +343,8 @@ export class InterventionComponent {
             next: (data) => {
                 if(data) {
                     this.affectationList.set(data);
+                    console.log(data);
+
                     const assignedEmployeeIds = data.map(a => a.idTechnicien);
                     this.targetEmployees.set(this.sourceEmployeesData().filter(emp => assignedEmployeeIds.includes(emp.idUtilisateur)));
                     this.sourceEmployees.set(this.sourceEmployeesData().filter(emp => !assignedEmployeeIds.includes(emp.idUtilisateur)));
@@ -516,4 +525,26 @@ export class InterventionComponent {
             }
         });
     }
+
+    getDepenses(intervention: Intervention) {
+        this.intervention = {}
+        this.displayDepense.set(false);
+        this.intervention = { ...intervention };
+        // this.loadGridDepense();
+        this.displayDetails = false;
+        this.inerventionDialog = false;
+        this.getAffectations(this.intervention.idIntervention!);
+        setTimeout(() => {
+            this.displayDepense.set(true);
+        }, 500);
+    }
+
+
+    loadGridDepense() {
+        this.interventionService.ChargerGrilleDepenses(this.intervention.idIntervention!)
+            .subscribe(x=>{
+                this.grilleDepense.set(x);
+            })
+    }
+
 }

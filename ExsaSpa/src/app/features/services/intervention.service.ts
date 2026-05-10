@@ -2,6 +2,7 @@ import { Injectable } from "@angular/core";
 import { ApiService } from "./api.service";
 import { Observable } from "rxjs";
 import { Utilisateur } from "./employe.service";
+import { RationTransportGridDto } from "../models/RationTransportGridDto";
 
 export interface Intervention {
   idIntervention?: string;
@@ -37,6 +38,7 @@ export interface AffectationIntervention {
   idTechnicien?: string;
   dateAffectation?: string;
   estPrincipal?: boolean;
+  technicien?: Utilisateur;
 }
 
 export interface RefStatutIntervention {
@@ -64,11 +66,39 @@ export interface PhotoIntervention {
   utilisateur?: Utilisateur;
 }
 
+export interface TypeDepenseIntervention {
+    code?: string;
+    libelle?: string;
+}
+
+export interface SaisieDepense{
+  idIntervention?: string;
+  techniciens?: AffectationIntervention[];
+  date?: string;
+  typeDepenseIntervention?: TypeDepenseIntervention;
+  typeDepense?: string;
+  montant?: number | null;
+  reference?:string;
+}
+
+export interface PathDepenseInterventionDto {
+  montant?: number | null;
+  typeDepense?: string;
+  date?: Date;
+  note?: string;
+  idTechnicien?: string;
+  idDepense: string | null;
+}
+
 @Injectable()
 export class InterventionService extends ApiService<Intervention> {
 
     constructor() {
         super('Interventions');
+    }
+
+    CreateDepenseIntervention(depense: SaisieDepense): Observable<boolean[]> {
+        return this.httpClient.post<boolean[]>(`${this.baseUrl}/Interventions/SaisieDepenseIntervention`, depense);
     }
 
     CreateAffectation(Affectations: AffectationIntervention[]): Observable<AffectationIntervention[]> {
@@ -107,5 +137,13 @@ export class InterventionService extends ApiService<Intervention> {
 
     DeletePhoto(idPhoto: string): Observable<any> {
         return this.httpClient.delete<any>(`${this.baseUrl}/Interventions/RemovePhoto/${idPhoto}`);
+    }
+
+    ChargerGrilleDepenses(idIntervention: string): Observable<RationTransportGridDto> {
+        return this.httpClient.get<RationTransportGridDto>(`${this.baseUrl}/Interventions/GetGrilleRationTransport/${idIntervention}`);
+    }
+
+    PathDepenseIntervention(idDepenseIntervention: string, depenseIntervention: any): Observable<boolean> {
+        return this.httpClient.patch<boolean>(`${this.baseUrl}/Interventions/PatchDepenseIntervention/${idDepenseIntervention}`, depenseIntervention);
     }
 }

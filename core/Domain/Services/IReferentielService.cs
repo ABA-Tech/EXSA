@@ -12,5 +12,6 @@ namespace Domain.Services
         Task<IEnumerable<RefStatutIntervention>> GetAllStatutInterventionsAsync();
         Task<IEnumerable<RefStatutFacture>> GetAllStatutFacturesAsync();
         Task<IEnumerable<RefRole>> GetAllRolesAsync();
+        Task<IEnumerable<RefTypeeDepenseIntervention>> GetAllTypeDepenseInterventionAsync();
     }
 }

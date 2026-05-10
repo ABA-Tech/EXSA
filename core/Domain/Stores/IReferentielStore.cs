@@ -12,5 +12,6 @@ namespace Domain.Stores
         Task<IEnumerable<RefStatutIntervention>> GetStatutInterventionsAsync();
         Task<IEnumerable<RefStatutFacture>> GetStatutFacturesAsync();
         Task<IEnumerable<RefRole>> GetRolesAsync();
+        Task<IEnumerable<RefTypeeDepenseIntervention>> GetTypeDepenseInterventionsAsync();
     }
 }
