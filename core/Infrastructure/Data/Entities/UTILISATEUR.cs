@@ -33,9 +33,15 @@ public partial class UTILISATEUR
 
     public virtual ICollection<AFFECTATION_INTERVENTION> AFFECTATION_INTERVENTIONs { get; set; } = new List<AFFECTATION_INTERVENTION>();
 
+    public virtual ICollection<AFFECTATION_VEHICULE> AFFECTATION_VEHICULEs { get; set; } = new List<AFFECTATION_VEHICULE>();
+
     public virtual ICollection<DEPENSE_INTERVENTION> DEPENSE_INTERVENTIONs { get; set; } = new List<DEPENSE_INTERVENTION>();
 
+    public virtual ICollection<DEPENSE_VEHICULE> DEPENSE_VEHICULEs { get; set; } = new List<DEPENSE_VEHICULE>();
+
     public virtual ICollection<EMPLOYE> EMPLOYEs { get; set; } = new List<EMPLOYE>();
+
+    public virtual ICollection<ENTRETIEN_VEHICULE> ENTRETIEN_VEHICULEs { get; set; } = new List<ENTRETIEN_VEHICULE>();
 
     public virtual LOCATAIRE ID_LOCATAIRENavigation { get; set; } = null!;
 
@@ -50,4 +56,6 @@ public partial class UTILISATEUR
     public virtual ICollection<POSITION_GP> POSITION_GPs { get; set; } = new List<POSITION_GP>();
 
     public virtual REF_ROLE ROLENavigation { get; set; } = null!;
+
+    public virtual ICollection<VEHICULE> VEHICULEs { get; set; } = new List<VEHICULE>();
 }

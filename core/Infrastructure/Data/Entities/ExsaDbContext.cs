@@ -18,11 +18,17 @@ public partial class ExsaDbContext : DbContext
 
     public virtual DbSet<AFFECTATION_INTERVENTION> AFFECTATION_INTERVENTIONs { get; set; }
 
+    public virtual DbSet<AFFECTATION_VEHICULE> AFFECTATION_VEHICULEs { get; set; }
+
     public virtual DbSet<ARTICLE_STOCK> ARTICLE_STOCKs { get; set; }
 
     public virtual DbSet<DEPENSE_INTERVENTION> DEPENSE_INTERVENTIONs { get; set; }
 
+    public virtual DbSet<DEPENSE_VEHICULE> DEPENSE_VEHICULEs { get; set; }
+
     public virtual DbSet<EMPLOYE> EMPLOYEs { get; set; }
+
+    public virtual DbSet<ENTRETIEN_VEHICULE> ENTRETIEN_VEHICULEs { get; set; }
 
     public virtual DbSet<FACTURE> FACTUREs { get; set; }
 
@@ -46,9 +52,15 @@ public partial class ExsaDbContext : DbContext
 
     public virtual DbSet<REF_STATUT_INTERVENTION> REF_STATUT_INTERVENTIONs { get; set; }
 
+    public virtual DbSet<REF_STATUT_VEHICULE> REF_STATUT_VEHICULEs { get; set; }
+
     public virtual DbSet<REF_TYPE_CONTRAT> REF_TYPE_CONTRATs { get; set; }
 
     public virtual DbSet<REF_TYPE_DEPENSE_INTERVENTION> REF_TYPE_DEPENSE_INTERVENTIONs { get; set; }
+
+    public virtual DbSet<REF_TYPE_DEPENSE_VEHICULE> REF_TYPE_DEPENSE_VEHICULEs { get; set; }
+
+    public virtual DbSet<REF_TYPE_ENTRETIEN> REF_TYPE_ENTRETIENs { get; set; }
 
     public virtual DbSet<REF_TYPE_INTERVENTION> REF_TYPE_INTERVENTIONs { get; set; }
 
@@ -58,7 +70,11 @@ public partial class ExsaDbContext : DbContext
 
     public virtual DbSet<REF_TYPE_PLAN> REF_TYPE_PLANs { get; set; }
 
+    public virtual DbSet<REF_TYPE_VEHICULE> REF_TYPE_VEHICULEs { get; set; }
+
     public virtual DbSet<UTILISATEUR> UTILISATEURs { get; set; }
+
+    public virtual DbSet<VEHICULE> VEHICULEs { get; set; }
 
     public virtual DbSet<VUE_ARTICLES_ALERTE_STOCK> VUE_ARTICLES_ALERTE_STOCKs { get; set; }
 
@@ -66,13 +82,17 @@ public partial class ExsaDbContext : DbContext
 
     public virtual DbSet<VUE_INTERVENTION_TECHNICIEN> VUE_INTERVENTION_TECHNICIENs { get; set; }
 
+    public virtual DbSet<V_ALERTES_VEHICULE> V_ALERTES_VEHICULEs { get; set; }
+
+    public virtual DbSet<V_DEPENSES_PAR_VEHICULE> V_DEPENSES_PAR_VEHICULEs { get; set; }
+
+    public virtual DbSet<V_VEHICULE_DASHBOARD> V_VEHICULE_DASHBOARDs { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseSqlServer("Name=ConnectionStrings:Default");
-    public DbSet<RationTransportOutput> RationTransportOutputs { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<RationTransportOutput>().HasNoKey().ToView(null);
         modelBuilder.Entity<AFFECTATION_INTERVENTION>(entity =>
         {
             entity.HasKey(e => e.ID_AFFECTATION);
@@ -93,6 +113,41 @@ public partial class ExsaDbContext : DbContext
                 .HasForeignKey(d => d.ID_TECHNICIEN)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_AFFECTATION_TECHNICIEN");
+        });
+
+        modelBuilder.Entity<AFFECTATION_VEHICULE>(entity =>
+        {
+            entity.HasKey(e => e.ID_AFFECTATION_VEHICULE);
+
+            entity.ToTable("AFFECTATION_VEHICULE", tb =>
+                {
+                    tb.HasTrigger("TR_AFFECTATION_VEHICULE_UpdateKm");
+                    tb.HasTrigger("TR_AFFECTATION_VEHICULE_UpdateStatut");
+                });
+
+            entity.HasIndex(e => e.ID_INTERVENTION, "IX_AFFVEH_INTERVENTION");
+
+            entity.HasIndex(e => new { e.ID_VEHICULE, e.DATE_FIN }, "IX_AFFVEH_VEHICULE_ACTIVE").HasFilter("([DATE_FIN] IS NULL)");
+
+            entity.Property(e => e.ID_AFFECTATION_VEHICULE).HasDefaultValueSql("(newsequentialid())");
+            entity.Property(e => e.DATE_CREATION).HasDefaultValueSql("(sysdatetime())");
+            entity.Property(e => e.DATE_DEBUT).HasDefaultValueSql("(sysdatetime())");
+            entity.Property(e => e.DISTANCE_KM).HasComputedColumnSql("(case when [KILOMETRAGE_ARRIVEE] IS NOT NULL then [KILOMETRAGE_ARRIVEE]-[KILOMETRAGE_DEPART]  end)", true);
+
+            entity.HasOne(d => d.ID_CONDUCTEURNavigation).WithMany(p => p.AFFECTATION_VEHICULEs)
+                .HasForeignKey(d => d.ID_CONDUCTEUR)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_AFFVEH_CONDUCTEUR");
+
+            entity.HasOne(d => d.ID_INTERVENTIONNavigation).WithMany(p => p.AFFECTATION_VEHICULEs)
+                .HasForeignKey(d => d.ID_INTERVENTION)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_AFFVEH_INTERVENTION");
+
+            entity.HasOne(d => d.ID_VEHICULENavigation).WithMany(p => p.AFFECTATION_VEHICULEs)
+                .HasForeignKey(d => d.ID_VEHICULE)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_AFFVEH_VEHICULE");
         });
 
         modelBuilder.Entity<ARTICLE_STOCK>(entity =>
@@ -153,6 +208,55 @@ public partial class ExsaDbContext : DbContext
                 .HasConstraintName("FK_DEPENSE_TYPE_DEPENSE");
         });
 
+        modelBuilder.Entity<DEPENSE_VEHICULE>(entity =>
+        {
+            entity.HasKey(e => e.ID_DEPENSE);
+
+            entity.ToTable("DEPENSE_VEHICULE");
+
+            entity.HasIndex(e => new { e.ID_LOCATAIRE, e.DATE_DEPENSE }, "IX_DEPVEH_HORS_MISSION")
+                .IsDescending(false, true)
+                .HasFilter("([ID_INTERVENTION] IS NULL)");
+
+            entity.HasIndex(e => e.ID_INTERVENTION, "IX_DEPVEH_INTERVENTION").HasFilter("([ID_INTERVENTION] IS NOT NULL)");
+
+            entity.HasIndex(e => new { e.ID_LOCATAIRE, e.DATE_DEPENSE }, "IX_DEPVEH_LOCATAIRE_DATE");
+
+            entity.HasIndex(e => new { e.ID_VEHICULE, e.DATE_DEPENSE }, "IX_DEPVEH_VEHICULE_DATE").IsDescending(false, true);
+
+            entity.Property(e => e.ID_DEPENSE).HasDefaultValueSql("(newsequentialid())");
+            entity.Property(e => e.DATE_CREATION).HasDefaultValueSql("(sysdatetime())");
+            entity.Property(e => e.DATE_DEPENSE).HasColumnType("date");
+            entity.Property(e => e.DESCRIPTION).HasMaxLength(500);
+            entity.Property(e => e.MONTANT_XAF).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.TYPE_DEPENSE).HasMaxLength(30);
+            entity.Property(e => e.URL_JUSTIFICATIF).HasMaxLength(500);
+
+            entity.HasOne(d => d.ID_INTERVENTIONNavigation).WithMany(p => p.DEPENSE_VEHICULEs)
+                .HasForeignKey(d => d.ID_INTERVENTION)
+                .HasConstraintName("FK_DEPVEH_INTERVENTION");
+
+            entity.HasOne(d => d.ID_LOCATAIRENavigation).WithMany(p => p.DEPENSE_VEHICULEs)
+                .HasForeignKey(d => d.ID_LOCATAIRE)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_DEPVEH_LOCATAIRE");
+
+            entity.HasOne(d => d.ID_SAISIE_PARNavigation).WithMany(p => p.DEPENSE_VEHICULEs)
+                .HasForeignKey(d => d.ID_SAISIE_PAR)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_DEPVEH_SAISIE");
+
+            entity.HasOne(d => d.ID_VEHICULENavigation).WithMany(p => p.DEPENSE_VEHICULEs)
+                .HasForeignKey(d => d.ID_VEHICULE)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_DEPVEH_VEHICULE");
+
+            entity.HasOne(d => d.TYPE_DEPENSENavigation).WithMany(p => p.DEPENSE_VEHICULEs)
+                .HasForeignKey(d => d.TYPE_DEPENSE)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_DEPVEH_TYPE");
+        });
+
         modelBuilder.Entity<EMPLOYE>(entity =>
         {
             entity.HasKey(e => e.ID_EMPLOYE);
@@ -185,6 +289,50 @@ public partial class ExsaDbContext : DbContext
                 .HasForeignKey(d => d.TYPE_CONTRAT)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_EMPLOYE_CONTRAT");
+        });
+
+        modelBuilder.Entity<ENTRETIEN_VEHICULE>(entity =>
+        {
+            entity.HasKey(e => e.ID_ENTRETIEN);
+
+            entity.ToTable("ENTRETIEN_VEHICULE", tb => tb.HasTrigger("TR_ENTRETIEN_VEHICULE_UpdateStatut"));
+
+            entity.HasIndex(e => new { e.ID_LOCATAIRE, e.STATUT, e.DATE_PREVUE }, "IX_ENTVEH_STATUT_DATE").HasFilter("([STATUT] IN ('PLANIFIE', 'EN_COURS', 'EN_RETARD'))");
+
+            entity.Property(e => e.ID_ENTRETIEN).HasDefaultValueSql("(newsequentialid())");
+            entity.Property(e => e.COUT_XAF).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.DATE_CREATION).HasDefaultValueSql("(sysdatetime())");
+            entity.Property(e => e.DATE_PREVUE).HasColumnType("date");
+            entity.Property(e => e.DATE_REALISE).HasColumnType("date");
+            entity.Property(e => e.PRESTATAIRE).HasMaxLength(200);
+            entity.Property(e => e.STATUT)
+                .HasMaxLength(20)
+                .HasDefaultValueSql("('PLANIFIE')");
+            entity.Property(e => e.TYPE_ENTRETIEN).HasMaxLength(30);
+
+            entity.HasOne(d => d.ID_CREATEURNavigation).WithMany(p => p.ENTRETIEN_VEHICULEs)
+                .HasForeignKey(d => d.ID_CREATEUR)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ENTVEH_CREATEUR");
+
+            entity.HasOne(d => d.ID_DEPENSENavigation).WithMany(p => p.ENTRETIEN_VEHICULEs)
+                .HasForeignKey(d => d.ID_DEPENSE)
+                .HasConstraintName("FK_ENTVEH_DEPENSE");
+
+            entity.HasOne(d => d.ID_LOCATAIRENavigation).WithMany(p => p.ENTRETIEN_VEHICULEs)
+                .HasForeignKey(d => d.ID_LOCATAIRE)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ENTVEH_LOCATAIRE");
+
+            entity.HasOne(d => d.ID_VEHICULENavigation).WithMany(p => p.ENTRETIEN_VEHICULEs)
+                .HasForeignKey(d => d.ID_VEHICULE)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ENTVEH_VEHICULE");
+
+            entity.HasOne(d => d.TYPE_ENTRETIENNavigation).WithMany(p => p.ENTRETIEN_VEHICULEs)
+                .HasForeignKey(d => d.TYPE_ENTRETIEN)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ENTVEH_TYPE");
         });
 
         modelBuilder.Entity<FACTURE>(entity =>
@@ -456,6 +604,20 @@ public partial class ExsaDbContext : DbContext
             entity.Property(e => e.LIBELLE).HasMaxLength(100);
         });
 
+        modelBuilder.Entity<REF_STATUT_VEHICULE>(entity =>
+        {
+            entity.HasKey(e => e.CODE);
+
+            entity.ToTable("REF_STATUT_VEHICULE");
+
+            entity.Property(e => e.CODE).HasMaxLength(30);
+            entity.Property(e => e.COULEUR_HEX)
+                .HasMaxLength(7)
+                .IsUnicode(false)
+                .IsFixedLength();
+            entity.Property(e => e.LIBELLE).HasMaxLength(100);
+        });
+
         modelBuilder.Entity<REF_TYPE_CONTRAT>(entity =>
         {
             entity.HasKey(e => e.CODE).HasName("PK__REF_TYPE__AA1D437894C08930");
@@ -473,6 +635,30 @@ public partial class ExsaDbContext : DbContext
             entity.ToTable("REF_TYPE_DEPENSE_INTERVENTION");
 
             entity.Property(e => e.CODE).HasMaxLength(20);
+            entity.Property(e => e.LIBELLE).HasMaxLength(100);
+        });
+
+        modelBuilder.Entity<REF_TYPE_DEPENSE_VEHICULE>(entity =>
+        {
+            entity.HasKey(e => e.CODE);
+
+            entity.ToTable("REF_TYPE_DEPENSE_VEHICULE");
+
+            entity.Property(e => e.CODE).HasMaxLength(30);
+            entity.Property(e => e.EST_DEDUCTIBLE)
+                .IsRequired()
+                .HasDefaultValueSql("((1))");
+            entity.Property(e => e.ICONE).HasMaxLength(10);
+            entity.Property(e => e.LIBELLE).HasMaxLength(100);
+        });
+
+        modelBuilder.Entity<REF_TYPE_ENTRETIEN>(entity =>
+        {
+            entity.HasKey(e => e.CODE);
+
+            entity.ToTable("REF_TYPE_ENTRETIEN");
+
+            entity.Property(e => e.CODE).HasMaxLength(30);
             entity.Property(e => e.LIBELLE).HasMaxLength(100);
         });
 
@@ -516,6 +702,16 @@ public partial class ExsaDbContext : DbContext
             entity.Property(e => e.LIBELLE).HasMaxLength(100);
         });
 
+        modelBuilder.Entity<REF_TYPE_VEHICULE>(entity =>
+        {
+            entity.HasKey(e => e.CODE);
+
+            entity.ToTable("REF_TYPE_VEHICULE");
+
+            entity.Property(e => e.CODE).HasMaxLength(30);
+            entity.Property(e => e.LIBELLE).HasMaxLength(100);
+        });
+
         modelBuilder.Entity<UTILISATEUR>(entity =>
         {
             entity.HasKey(e => e.ID_UTILISATEUR);
@@ -547,6 +743,58 @@ public partial class ExsaDbContext : DbContext
                 .HasForeignKey(d => d.ROLE)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_UTILISATEUR_ROLE");
+        });
+
+        modelBuilder.Entity<VEHICULE>(entity =>
+        {
+            entity.HasKey(e => e.ID_VEHICULE);
+
+            entity.ToTable("VEHICULE");
+
+            entity.HasIndex(e => new { e.ID_LOCATAIRE, e.ASSURANCE_EXPIRATION, e.VISITE_TECHNIQUE_EXPIRATION }, "IX_VEHICULE_DOCS_EXPIRATION").HasFilter("([EST_SUPPRIME]=(0))");
+
+            entity.HasIndex(e => new { e.ID_LOCATAIRE, e.STATUT }, "IX_VEHICULE_LOCATAIRE_STATUT").HasFilter("([EST_SUPPRIME]=(0))");
+
+            entity.HasIndex(e => new { e.ID_LOCATAIRE, e.IMMATRICULATION }, "UQ_VEHICULE_IMMAT").IsUnique();
+
+            entity.Property(e => e.ID_VEHICULE).HasDefaultValueSql("(newsequentialid())");
+            entity.Property(e => e.ASSURANCE_COMPAGNIE).HasMaxLength(200);
+            entity.Property(e => e.ASSURANCE_EXPIRATION).HasColumnType("date");
+            entity.Property(e => e.ASSURANCE_NUMERO).HasMaxLength(100);
+            entity.Property(e => e.COULEUR).HasMaxLength(50);
+            entity.Property(e => e.DATE_ACQUISITION).HasColumnType("date");
+            entity.Property(e => e.DATE_CREATION).HasDefaultValueSql("(sysdatetime())");
+            entity.Property(e => e.IMMATRICULATION).HasMaxLength(20);
+            entity.Property(e => e.MARQUE).HasMaxLength(100);
+            entity.Property(e => e.MODELE).HasMaxLength(100);
+            entity.Property(e => e.PRIX_ACQUISITION_XAF).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.STATUT)
+                .HasMaxLength(30)
+                .HasDefaultValueSql("('DISPONIBLE')");
+            entity.Property(e => e.TYPE_VEHICULE).HasMaxLength(30);
+            entity.Property(e => e.URL_PHOTO).HasMaxLength(500);
+            entity.Property(e => e.VIGNETTE_EXPIRATION).HasColumnType("date");
+            entity.Property(e => e.VISITE_TECHNIQUE_EXPIRATION).HasColumnType("date");
+
+            entity.HasOne(d => d.ID_CREATEURNavigation).WithMany(p => p.VEHICULEs)
+                .HasForeignKey(d => d.ID_CREATEUR)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_VEHICULE_CREATEUR");
+
+            entity.HasOne(d => d.ID_LOCATAIRENavigation).WithMany(p => p.VEHICULEs)
+                .HasForeignKey(d => d.ID_LOCATAIRE)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_VEHICULE_LOCATAIRE");
+
+            entity.HasOne(d => d.STATUTNavigation).WithMany(p => p.VEHICULEs)
+                .HasForeignKey(d => d.STATUT)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_VEHICULE_STATUT");
+
+            entity.HasOne(d => d.TYPE_VEHICULENavigation).WithMany(p => p.VEHICULEs)
+                .HasForeignKey(d => d.TYPE_VEHICULE)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_VEHICULE_TYPE");
         });
 
         modelBuilder.Entity<VUE_ARTICLES_ALERTE_STOCK>(entity =>
@@ -591,6 +839,67 @@ public partial class ExsaDbContext : DbContext
             entity.Property(e => e.TEL_TECHNICIEN_PRINCIPAL).HasMaxLength(20);
             entity.Property(e => e.TITRE).HasMaxLength(300);
             entity.Property(e => e.TYPE).HasMaxLength(20);
+        });
+
+        modelBuilder.Entity<V_ALERTES_VEHICULE>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToView("V_ALERTES_VEHICULE");
+
+            entity.Property(e => e.IMMATRICULATION).HasMaxLength(20);
+            entity.Property(e => e.MESSAGE).HasMaxLength(4000);
+            entity.Property(e => e.NIVEAU)
+                .HasMaxLength(13)
+                .IsUnicode(false);
+            entity.Property(e => e.TYPE_ALERTE)
+                .HasMaxLength(19)
+                .IsUnicode(false);
+        });
+
+        modelBuilder.Entity<V_DEPENSES_PAR_VEHICULE>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToView("V_DEPENSES_PAR_VEHICULE");
+
+            entity.Property(e => e.CONTEXTE)
+                .HasMaxLength(12)
+                .IsUnicode(false);
+            entity.Property(e => e.DATE_DEPENSE).HasColumnType("date");
+            entity.Property(e => e.DESCRIPTION).HasMaxLength(500);
+            entity.Property(e => e.IMMATRICULATION).HasMaxLength(20);
+            entity.Property(e => e.INTERVENTION_REFERENCE).HasMaxLength(30);
+            entity.Property(e => e.INTERVENTION_TITRE).HasMaxLength(300);
+            entity.Property(e => e.MONTANT_XAF).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.SAISIE_PAR).HasMaxLength(200);
+            entity.Property(e => e.TYPE_DEPENSE).HasMaxLength(30);
+            entity.Property(e => e.TYPE_DEPENSE_LIBELLE).HasMaxLength(100);
+            entity.Property(e => e.URL_JUSTIFICATIF).HasMaxLength(500);
+            entity.Property(e => e.VEHICULE).HasMaxLength(201);
+        });
+
+        modelBuilder.Entity<V_VEHICULE_DASHBOARD>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToView("V_VEHICULE_DASHBOARD");
+
+            entity.Property(e => e.ASSURANCE_EXPIRATION).HasColumnType("date");
+            entity.Property(e => e.COULEUR_HEX)
+                .HasMaxLength(7)
+                .IsUnicode(false)
+                .IsFixedLength();
+            entity.Property(e => e.DEPENSES_EN_MISSION_XAF).HasColumnType("decimal(38, 2)");
+            entity.Property(e => e.DEPENSES_HORS_MISSION_XAF).HasColumnType("decimal(38, 2)");
+            entity.Property(e => e.DESIGNATION).HasMaxLength(201);
+            entity.Property(e => e.IMMATRICULATION).HasMaxLength(20);
+            entity.Property(e => e.STATUT).HasMaxLength(30);
+            entity.Property(e => e.STATUT_LIBELLE).HasMaxLength(100);
+            entity.Property(e => e.TOTAL_DEPENSES_XAF).HasColumnType("decimal(38, 2)");
+            entity.Property(e => e.TYPE_VEHICULE).HasMaxLength(30);
+            entity.Property(e => e.VIGNETTE_EXPIRATION).HasColumnType("date");
+            entity.Property(e => e.VISITE_TECHNIQUE_EXPIRATION).HasColumnType("date");
         });
 
         OnModelCreatingPartial(modelBuilder);

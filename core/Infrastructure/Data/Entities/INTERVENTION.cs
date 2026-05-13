@@ -55,7 +55,11 @@ public partial class INTERVENTION
 
     public virtual ICollection<AFFECTATION_INTERVENTION> AFFECTATION_INTERVENTIONs { get; set; } = new List<AFFECTATION_INTERVENTION>();
 
+    public virtual ICollection<AFFECTATION_VEHICULE> AFFECTATION_VEHICULEs { get; set; } = new List<AFFECTATION_VEHICULE>();
+
     public virtual ICollection<DEPENSE_INTERVENTION> DEPENSE_INTERVENTIONs { get; set; } = new List<DEPENSE_INTERVENTION>();
+
+    public virtual ICollection<DEPENSE_VEHICULE> DEPENSE_VEHICULEs { get; set; } = new List<DEPENSE_VEHICULE>();
 
     public virtual ICollection<FACTURE> FACTUREs { get; set; } = new List<FACTURE>();
 

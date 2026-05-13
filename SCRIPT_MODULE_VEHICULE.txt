@@ -1,0 +1,746 @@
+
+
+-- ============================================================
+-- 0. NETTOYAGE (ordre inverse des dépendances)
+-- ============================================================
+IF OBJECT_ID('dbo.TR_AFFECTATION_VEHICULE_UpdateKm',      'TR') IS NOT NULL DROP TRIGGER dbo.TR_AFFECTATION_VEHICULE_UpdateKm;
+IF OBJECT_ID('dbo.TR_AFFECTATION_VEHICULE_UpdateStatut',  'TR') IS NOT NULL DROP TRIGGER dbo.TR_AFFECTATION_VEHICULE_UpdateStatut;
+IF OBJECT_ID('dbo.TR_ENTRETIEN_VEHICULE_UpdateStatut',    'TR') IS NOT NULL DROP TRIGGER dbo.TR_ENTRETIEN_VEHICULE_UpdateStatut;
+IF OBJECT_ID('dbo.V_VEHICULE_DASHBOARD',  'V') IS NOT NULL DROP VIEW dbo.V_VEHICULE_DASHBOARD;
+IF OBJECT_ID('dbo.V_DEPENSES_PAR_VEHICULE','V') IS NOT NULL DROP VIEW dbo.V_DEPENSES_PAR_VEHICULE;
+IF OBJECT_ID('dbo.V_ALERTES_VEHICULE',     'V') IS NOT NULL DROP VIEW dbo.V_ALERTES_VEHICULE;
+IF OBJECT_ID('dbo.ENTRETIEN_VEHICULE',  'U') IS NOT NULL DROP TABLE dbo.ENTRETIEN_VEHICULE;
+IF OBJECT_ID('dbo.DEPENSE_VEHICULE',    'U') IS NOT NULL DROP TABLE dbo.DEPENSE_VEHICULE;
+IF OBJECT_ID('dbo.AFFECTATION_VEHICULE','U') IS NOT NULL DROP TABLE dbo.AFFECTATION_VEHICULE;
+IF OBJECT_ID('dbo.VEHICULE',            'U') IS NOT NULL DROP TABLE dbo.VEHICULE;
+IF OBJECT_ID('dbo.REF_TYPE_ENTRETIEN',  'U') IS NOT NULL DROP TABLE dbo.REF_TYPE_ENTRETIEN;
+IF OBJECT_ID('dbo.REF_TYPE_DEPENSE_VEHICULE',    'U') IS NOT NULL DROP TABLE dbo.REF_TYPE_DEPENSE_VEHICULE;
+IF OBJECT_ID('dbo.REF_TYPE_VEHICULE',   'U') IS NOT NULL DROP TABLE dbo.REF_TYPE_VEHICULE;
+IF OBJECT_ID('dbo.REF_STATUT_VEHICULE', 'U') IS NOT NULL DROP TABLE dbo.REF_STATUT_VEHICULE;
+GO
+
+-- ============================================================
+-- 1. TABLES DE RÉFÉRENCE
+-- ============================================================
+
+-- ------------------------------------------------------------
+-- 1.1 REF_STATUT_VEHICULE
+-- ------------------------------------------------------------
+CREATE TABLE dbo.REF_STATUT_VEHICULE
+(
+    CODE         NVARCHAR(30)  NOT NULL CONSTRAINT PK_REF_STATUT_VEHICULE PRIMARY KEY,
+    LIBELLE      NVARCHAR(100) NOT NULL,
+    COULEUR_HEX  CHAR(7)       NULL,   -- pour affichage IHM
+    ORDRE        TINYINT       NOT NULL DEFAULT 0
+);
+GO
+
+INSERT INTO dbo.REF_STATUT_VEHICULE (CODE, LIBELLE, COULEUR_HEX, ORDRE) VALUES
+    ('DISPONIBLE',      'Disponible',         '#1D9E75', 1),
+    ('EN_MISSION',      'En mission',          '#185FA5', 2),
+    ('EN_MAINTENANCE',  'En maintenance',      '#BA7517', 3),
+    ('HORS_SERVICE',    'Hors service',        '#A32D2D', 4);
+GO
+
+-- ------------------------------------------------------------
+-- 1.2 REF_TYPE_VEHICULE
+-- ------------------------------------------------------------
+CREATE TABLE dbo.REF_TYPE_VEHICULE
+(
+    CODE    NVARCHAR(30)  NOT NULL CONSTRAINT PK_REF_TYPE_VEHICULE PRIMARY KEY,
+    LIBELLE NVARCHAR(100) NOT NULL
+);
+GO
+
+INSERT INTO dbo.REF_TYPE_VEHICULE (CODE, LIBELLE) VALUES
+    ('MOTO',         'Motocyclette'),
+    ('VOITURE',      'Voiture de service'),
+    ('CAMIONNETTE',  'Camionnette'),
+    ('PICKUP',       'Pick-up'),
+    ('CAMION',       'Camion / Utilitaire lourd');
+GO
+
+-- ------------------------------------------------------------
+-- 1.3 REF_TYPE_DEPENSE_VEHICULE
+-- ------------------------------------------------------------
+CREATE TABLE dbo.REF_TYPE_DEPENSE_VEHICULE
+(
+    CODE           NVARCHAR(30)  NOT NULL CONSTRAINT PK_REF_TYPE_DEPENSE_VEHICULE PRIMARY KEY,
+    LIBELLE        NVARCHAR(100) NOT NULL,
+    EST_DEDUCTIBLE BIT           NOT NULL DEFAULT 1, -- déductible en comptabilité
+    ICONE          NVARCHAR(10)  NULL                -- emoji IHM
+);
+GO
+
+INSERT INTO dbo.REF_TYPE_DEPENSE_VEHICULE (CODE, LIBELLE, EST_DEDUCTIBLE, ICONE) VALUES
+    ('CARBURANT',  'Carburant',              1, N'⛽'),
+    ('ENTRETIEN',  'Entretien courant',       1, N'🔧'),
+    ('REPARATION', 'Réparation',              1, N'🔩'),
+    ('ASSURANCE',  'Assurance',               1, N'📋'),
+    ('VIGNETTE',   'Vignette / Taxe',         1, N'🏷'),
+    ('PEAGE',      'Péage / Pont',            1, N'🛣'),
+    ('LAVAGE',     'Lavage / Entretien ext.', 0, N'🚿'),
+    ('AMENDE',     'Amende / Contravention',  0, N'⚠'),
+    ('AUTRE',      'Autre dépense',           0, N'📌');
+GO
+
+-- ------------------------------------------------------------
+-- 1.4 REF_TYPE_ENTRETIEN
+-- ------------------------------------------------------------
+CREATE TABLE dbo.REF_TYPE_ENTRETIEN
+(
+    CODE               NVARCHAR(30)  NOT NULL CONSTRAINT PK_REF_TYPE_ENTRETIEN PRIMARY KEY,
+    LIBELLE            NVARCHAR(100) NOT NULL,
+    PERIODICITE_KM     INT           NULL,  -- tous les N km
+    PERIODICITE_MOIS   TINYINT       NULL   -- tous les N mois
+);
+GO
+
+INSERT INTO dbo.REF_TYPE_ENTRETIEN (CODE, LIBELLE, PERIODICITE_KM, PERIODICITE_MOIS) VALUES
+    ('VIDANGE',             'Vidange + filtre huile',         10000, 6),
+    ('PNEUS',               'Remplacement pneus',             50000, NULL),
+    ('FREINS',              'Révision système de freinage',   40000, NULL),
+    ('REVISION',            'Révision complète',              20000, 12),
+    ('CONTROLE_TECHNIQUE',  'Contrôle technique',             NULL,  24),
+    ('VISITE_TECHNIQUE',    'Visite technique administrative', NULL,  12),
+    ('BATTERIE',            'Remplacement batterie',          NULL,  36),
+    ('REPARATION',          'Réparation imprévue',            NULL,  NULL),
+    ('AUTRE',               'Autre intervention',             NULL,  NULL);
+GO
+
+
+-- ============================================================
+-- 2. TABLE VEHICULE
+-- ============================================================
+CREATE TABLE dbo.VEHICULE
+(
+    -- Identification
+    ID_VEHICULE                   UNIQUEIDENTIFIER NOT NULL
+                                    CONSTRAINT PK_VEHICULE PRIMARY KEY
+                                    DEFAULT NEWSEQUENTIALID(),
+    ID_LOCATAIRE                  UNIQUEIDENTIFIER NOT NULL,
+
+    -- Informations véhicule
+    IMMATRICULATION               NVARCHAR(20)  NOT NULL,
+    MARQUE                        NVARCHAR(100) NOT NULL,
+    MODELE                        NVARCHAR(100) NOT NULL,
+    ANNEE                         SMALLINT      NOT NULL
+                                    CONSTRAINT CK_VEHICULE_ANNEE
+                                    CHECK (ANNEE BETWEEN 1990 AND 2100),
+    TYPE_VEHICULE                 NVARCHAR(30)  NOT NULL,  -- FK → REF_TYPE_VEHICULE
+    COULEUR                       NVARCHAR(50)  NULL,
+
+    -- Kilométrage
+    KILOMETRAGE_ACTUEL            INT           NOT NULL DEFAULT 0
+                                    CONSTRAINT CK_VEHICULE_KM
+                                    CHECK (KILOMETRAGE_ACTUEL >= 0),
+
+    -- Acquisition
+    DATE_ACQUISITION              DATE          NULL,
+    PRIX_ACQUISITION_XAF          DECIMAL(18,2) NULL,
+
+    -- Documents obligatoires
+    ASSURANCE_COMPAGNIE           NVARCHAR(200) NULL,
+    ASSURANCE_NUMERO              NVARCHAR(100) NULL,
+    ASSURANCE_EXPIRATION          DATE          NULL,
+    VIGNETTE_EXPIRATION           DATE          NULL,
+    VISITE_TECHNIQUE_EXPIRATION   DATE          NULL,
+
+    -- Statut & médias
+    STATUT                        NVARCHAR(30)  NOT NULL DEFAULT 'DISPONIBLE',  -- FK → REF_STATUT_VEHICULE
+    URL_PHOTO                     NVARCHAR(500) NULL,
+    NOTES                         NVARCHAR(MAX) NULL,
+
+    -- Audit
+    ID_CREATEUR                   UNIQUEIDENTIFIER NOT NULL,
+    DATE_CREATION                 DATETIME2     NOT NULL DEFAULT SYSDATETIME(),
+    DATE_MODIFICATION             DATETIME2     NULL,
+    EST_SUPPRIME                  BIT           NOT NULL DEFAULT 0,
+
+    -- Contraintes
+    CONSTRAINT UQ_VEHICULE_IMMAT
+        UNIQUE (ID_LOCATAIRE, IMMATRICULATION),
+
+    CONSTRAINT FK_VEHICULE_LOCATAIRE
+        FOREIGN KEY (ID_LOCATAIRE)
+        REFERENCES dbo.LOCATAIRE (ID_LOCATAIRE),
+
+    CONSTRAINT FK_VEHICULE_CREATEUR
+        FOREIGN KEY (ID_CREATEUR)
+        REFERENCES dbo.UTILISATEUR (ID_UTILISATEUR),
+
+    CONSTRAINT FK_VEHICULE_STATUT
+        FOREIGN KEY (STATUT)
+        REFERENCES dbo.REF_STATUT_VEHICULE (CODE),
+
+    CONSTRAINT FK_VEHICULE_TYPE
+        FOREIGN KEY (TYPE_VEHICULE)
+        REFERENCES dbo.REF_TYPE_VEHICULE (CODE)
+);
+GO
+
+
+-- ============================================================
+-- 3. TABLE AFFECTATION_VEHICULE
+--    Lie un VEHICULE à une INTERVENTION avec suivi kilométrique
+-- ============================================================
+CREATE TABLE dbo.AFFECTATION_VEHICULE
+(
+    ID_AFFECTATION_VEHICULE  UNIQUEIDENTIFIER NOT NULL
+                               CONSTRAINT PK_AFFECTATION_VEHICULE PRIMARY KEY
+                               DEFAULT NEWSEQUENTIALID(),
+
+    ID_VEHICULE              UNIQUEIDENTIFIER NOT NULL,
+    ID_INTERVENTION          UNIQUEIDENTIFIER NOT NULL,
+    ID_CONDUCTEUR            UNIQUEIDENTIFIER NOT NULL,   -- UTILISATEUR (technicien)
+
+    -- Kilométrage
+    KILOMETRAGE_DEPART       INT              NOT NULL
+                               CONSTRAINT CK_AFFVEH_KM_DEP CHECK (KILOMETRAGE_DEPART >= 0),
+    KILOMETRAGE_ARRIVEE      INT              NULL,
+    -- Colonne calculée persistée (KM_ARR - KM_DEP)
+    DISTANCE_KM              AS (
+                               CASE
+                                 WHEN KILOMETRAGE_ARRIVEE IS NOT NULL
+                                 THEN KILOMETRAGE_ARRIVEE - KILOMETRAGE_DEPART
+                                 ELSE NULL
+                               END
+                             ) PERSISTED,
+
+    -- Dates
+    DATE_DEBUT               DATETIME2        NOT NULL DEFAULT SYSDATETIME(),
+    DATE_FIN                 DATETIME2        NULL,
+
+    NOTES                    NVARCHAR(MAX)    NULL,
+    DATE_CREATION            DATETIME2        NOT NULL DEFAULT SYSDATETIME(),
+
+    -- Contraintes
+    CONSTRAINT CK_AFFVEH_KM_ARR
+        CHECK (KILOMETRAGE_ARRIVEE IS NULL
+               OR KILOMETRAGE_ARRIVEE >= KILOMETRAGE_DEPART),
+
+    CONSTRAINT CK_AFFVEH_DATES
+        CHECK (DATE_FIN IS NULL OR DATE_FIN >= DATE_DEBUT),
+
+    CONSTRAINT FK_AFFVEH_VEHICULE
+        FOREIGN KEY (ID_VEHICULE)
+        REFERENCES dbo.VEHICULE (ID_VEHICULE),
+
+    CONSTRAINT FK_AFFVEH_INTERVENTION
+        FOREIGN KEY (ID_INTERVENTION)
+        REFERENCES dbo.INTERVENTION (ID_INTERVENTION),
+
+    CONSTRAINT FK_AFFVEH_CONDUCTEUR
+        FOREIGN KEY (ID_CONDUCTEUR)
+        REFERENCES dbo.UTILISATEUR (ID_UTILISATEUR)
+);
+GO
+
+
+-- ============================================================
+-- 4. TABLE DEPENSE_VEHICULE
+--    ID_INTERVENTION nullable : dépense pendant OU hors mission
+-- ============================================================
+CREATE TABLE dbo.DEPENSE_VEHICULE
+(
+    ID_DEPENSE               UNIQUEIDENTIFIER NOT NULL
+                               CONSTRAINT PK_DEPENSE_VEHICULE PRIMARY KEY
+                               DEFAULT NEWSEQUENTIALID(),
+
+    ID_LOCATAIRE             UNIQUEIDENTIFIER NOT NULL,
+    ID_VEHICULE              UNIQUEIDENTIFIER NOT NULL,
+
+    -- Lien optionnel : NULL si dépense hors intervention
+    -- (assurance, vignette, entretien planifié, amende...)
+    ID_INTERVENTION          UNIQUEIDENTIFIER NULL,
+
+    ID_SAISIE_PAR            UNIQUEIDENTIFIER NOT NULL,
+
+    -- Dépense
+    TYPE_DEPENSE             NVARCHAR(30)     NOT NULL,  -- FK → REF_TYPE_DEPENSE_VEHICULE
+    MONTANT_XAF              DECIMAL(18,2)    NOT NULL
+                               CONSTRAINT CK_DEPVEH_MONTANT CHECK (MONTANT_XAF > 0),
+    DATE_DEPENSE             DATE             NOT NULL,
+    DESCRIPTION              NVARCHAR(500)    NULL,
+
+    -- Contexte
+    KILOMETRAGE_AU_MOMENT    INT              NULL,
+    URL_JUSTIFICATIF         NVARCHAR(500)    NULL,   -- photo reçu en blob
+
+    -- Audit
+    DATE_CREATION            DATETIME2        NOT NULL DEFAULT SYSDATETIME(),
+    DATE_MODIFICATION        DATETIME2        NULL,
+
+    -- Contraintes
+    CONSTRAINT FK_DEPVEH_LOCATAIRE
+        FOREIGN KEY (ID_LOCATAIRE)
+        REFERENCES dbo.LOCATAIRE (ID_LOCATAIRE),
+
+    CONSTRAINT FK_DEPVEH_VEHICULE
+        FOREIGN KEY (ID_VEHICULE)
+        REFERENCES dbo.VEHICULE (ID_VEHICULE),
+
+    CONSTRAINT FK_DEPVEH_INTERVENTION
+        FOREIGN KEY (ID_INTERVENTION)
+        REFERENCES dbo.INTERVENTION (ID_INTERVENTION),
+
+    CONSTRAINT FK_DEPVEH_SAISIE
+        FOREIGN KEY (ID_SAISIE_PAR)
+        REFERENCES dbo.UTILISATEUR (ID_UTILISATEUR),
+
+    CONSTRAINT FK_DEPVEH_TYPE
+        FOREIGN KEY (TYPE_DEPENSE)
+        REFERENCES dbo.REF_TYPE_DEPENSE_VEHICULE (CODE)
+);
+GO
+
+
+-- ============================================================
+-- 5. TABLE ENTRETIEN_VEHICULE
+--    Maintenances planifiées et correctives
+-- ============================================================
+CREATE TABLE dbo.ENTRETIEN_VEHICULE
+(
+    ID_ENTRETIEN             UNIQUEIDENTIFIER NOT NULL
+                               CONSTRAINT PK_ENTRETIEN_VEHICULE PRIMARY KEY
+                               DEFAULT NEWSEQUENTIALID(),
+
+    ID_LOCATAIRE             UNIQUEIDENTIFIER NOT NULL,
+    ID_VEHICULE              UNIQUEIDENTIFIER NOT NULL,
+    -- Lié à une DEPENSE_VEHICULE si réalisé et facturé
+    ID_DEPENSE               UNIQUEIDENTIFIER NULL,
+
+    TYPE_ENTRETIEN           NVARCHAR(30)     NOT NULL,  -- FK → REF_TYPE_ENTRETIEN
+
+    -- Planification
+    DATE_PREVUE              DATE             NOT NULL,
+    KILOMETRAGE_PREVU        INT              NULL,
+    PRESTATAIRE              NVARCHAR(200)    NULL,
+
+    -- Réalisation
+    DATE_REALISE             DATE             NULL,
+    KILOMETRAGE_REALISE      INT              NULL,
+    COUT_XAF                 DECIMAL(18,2)    NULL,
+
+    STATUT                   NVARCHAR(20)     NOT NULL DEFAULT 'PLANIFIE'
+                               CONSTRAINT CK_ENTVEH_STATUT
+                               CHECK (STATUT IN ('PLANIFIE','EN_COURS','REALISE','EN_RETARD','ANNULE')),
+
+    NOTES                    NVARCHAR(MAX)    NULL,
+
+    -- Audit
+    ID_CREATEUR              UNIQUEIDENTIFIER NOT NULL,
+    DATE_CREATION            DATETIME2        NOT NULL DEFAULT SYSDATETIME(),
+    DATE_MODIFICATION        DATETIME2        NULL,
+
+    -- Contraintes
+    CONSTRAINT FK_ENTVEH_LOCATAIRE
+        FOREIGN KEY (ID_LOCATAIRE)
+        REFERENCES dbo.LOCATAIRE (ID_LOCATAIRE),
+
+    CONSTRAINT FK_ENTVEH_VEHICULE
+        FOREIGN KEY (ID_VEHICULE)
+        REFERENCES dbo.VEHICULE (ID_VEHICULE),
+
+    CONSTRAINT FK_ENTVEH_DEPENSE
+        FOREIGN KEY (ID_DEPENSE)
+        REFERENCES dbo.DEPENSE_VEHICULE (ID_DEPENSE),
+
+    CONSTRAINT FK_ENTVEH_CREATEUR
+        FOREIGN KEY (ID_CREATEUR)
+        REFERENCES dbo.UTILISATEUR (ID_UTILISATEUR),
+
+    CONSTRAINT FK_ENTVEH_TYPE
+        FOREIGN KEY (TYPE_ENTRETIEN)
+        REFERENCES dbo.REF_TYPE_ENTRETIEN (CODE)
+);
+GO
+
+
+-- ============================================================
+-- 6. INDEX DE PERFORMANCE
+-- ============================================================
+
+-- VEHICULE ────────────────────────────────────────────────────
+-- Recherche par tenant + statut (liste parc)
+CREATE INDEX IX_VEHICULE_LOCATAIRE_STATUT
+    ON dbo.VEHICULE (ID_LOCATAIRE, STATUT)
+    INCLUDE (IMMATRICULATION, MARQUE, MODELE, KILOMETRAGE_ACTUEL)
+    WHERE EST_SUPPRIME = 0;
+
+-- Alertes documentaires (job quotidien)
+CREATE INDEX IX_VEHICULE_DOCS_EXPIRATION
+    ON dbo.VEHICULE (ID_LOCATAIRE, ASSURANCE_EXPIRATION, VISITE_TECHNIQUE_EXPIRATION)
+    WHERE EST_SUPPRIME = 0;
+
+-- AFFECTATION_VEHICULE ────────────────────────────────────────
+-- Affectations actives par véhicule
+CREATE INDEX IX_AFFVEH_VEHICULE_ACTIVE
+    ON dbo.AFFECTATION_VEHICULE (ID_VEHICULE, DATE_FIN)
+    WHERE DATE_FIN IS NULL;
+
+-- Historique par intervention
+CREATE INDEX IX_AFFVEH_INTERVENTION
+    ON dbo.AFFECTATION_VEHICULE (ID_INTERVENTION)
+    INCLUDE (ID_VEHICULE, ID_CONDUCTEUR, KILOMETRAGE_DEPART, KILOMETRAGE_ARRIVEE, DISTANCE_KM);
+
+-- DEPENSE_VEHICULE ────────────────────────────────────────────
+-- Dépenses par véhicule + date (historique fiche)
+CREATE INDEX IX_DEPVEH_VEHICULE_DATE
+    ON dbo.DEPENSE_VEHICULE (ID_VEHICULE, DATE_DEPENSE DESC)
+    INCLUDE (TYPE_DEPENSE, MONTANT_XAF, ID_INTERVENTION);
+
+-- Dépenses liées à une intervention (nullable FK)
+CREATE INDEX IX_DEPVEH_INTERVENTION
+    ON dbo.DEPENSE_VEHICULE (ID_INTERVENTION)
+    WHERE ID_INTERVENTION IS NOT NULL;
+
+-- Dépenses hors intervention (fixe/admin)
+CREATE INDEX IX_DEPVEH_HORS_MISSION
+    ON dbo.DEPENSE_VEHICULE (ID_LOCATAIRE, DATE_DEPENSE DESC)
+    WHERE ID_INTERVENTION IS NULL;
+
+-- Totaux par tenant + mois (dashboard)
+CREATE INDEX IX_DEPVEH_LOCATAIRE_DATE
+    ON dbo.DEPENSE_VEHICULE (ID_LOCATAIRE, DATE_DEPENSE)
+    INCLUDE (TYPE_DEPENSE, MONTANT_XAF);
+
+-- ENTRETIEN_VEHICULE ──────────────────────────────────────────
+-- Entretiens à venir / en retard (alertes)
+CREATE INDEX IX_ENTVEH_STATUT_DATE
+    ON dbo.ENTRETIEN_VEHICULE (ID_LOCATAIRE, STATUT, DATE_PREVUE)
+    WHERE STATUT IN ('PLANIFIE','EN_COURS','EN_RETARD');
+GO
+
+
+-- ============================================================
+-- 7. TRIGGERS
+-- ============================================================
+
+-- ------------------------------------------------------------
+-- TR1 : Mise à jour de KILOMETRAGE_ACTUEL
+--       Après la clôture d'une AFFECTATION_VEHICULE
+-- ------------------------------------------------------------
+CREATE TRIGGER dbo.TR_AFFECTATION_VEHICULE_UpdateKm
+ON dbo.AFFECTATION_VEHICULE
+AFTER UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Met à jour KILOMETRAGE_ACTUEL si KILOMETRAGE_ARRIVEE vient d'être renseigné
+    UPDATE v SET
+        v.KILOMETRAGE_ACTUEL   = i.KILOMETRAGE_ARRIVEE,
+        v.DATE_MODIFICATION    = SYSDATETIME()
+    FROM dbo.VEHICULE v
+    INNER JOIN inserted  i ON i.ID_VEHICULE = v.ID_VEHICULE
+    INNER JOIN deleted   d ON d.ID_VEHICULE = v.ID_VEHICULE
+    WHERE i.KILOMETRAGE_ARRIVEE IS NOT NULL
+      AND d.KILOMETRAGE_ARRIVEE IS NULL   -- seulement au moment de la clôture
+      AND i.KILOMETRAGE_ARRIVEE > v.KILOMETRAGE_ACTUEL;
+END;
+GO
+
+-- ------------------------------------------------------------
+-- TR2 : Gestion du statut VEHICULE selon les affectations
+--       - INSERT affectation  → VEHICULE passe EN_MISSION
+--       - UPDATE (clôture)    → VEHICULE repasse DISPONIBLE
+-- ------------------------------------------------------------
+CREATE TRIGGER dbo.TR_AFFECTATION_VEHICULE_UpdateStatut
+ON dbo.AFFECTATION_VEHICULE
+AFTER INSERT, UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Passage EN_MISSION (nouvelle affectation ouverte)
+    UPDATE v SET
+        v.STATUT            = 'EN_MISSION',
+        v.DATE_MODIFICATION = SYSDATETIME()
+    FROM dbo.VEHICULE v
+    INNER JOIN inserted i ON i.ID_VEHICULE = v.ID_VEHICULE
+    WHERE i.DATE_FIN IS NULL
+      AND v.STATUT = 'DISPONIBLE';
+
+    -- Retour DISPONIBLE (affectation clôturée)
+    UPDATE v SET
+        v.STATUT            = 'DISPONIBLE',
+        v.DATE_MODIFICATION = SYSDATETIME()
+    FROM dbo.VEHICULE v
+    INNER JOIN inserted i ON i.ID_VEHICULE = v.ID_VEHICULE
+    -- Aucune autre affectation ouverte sur ce véhicule
+    WHERE i.DATE_FIN IS NOT NULL
+      AND v.STATUT = 'EN_MISSION'
+      AND NOT EXISTS (
+          SELECT 1 FROM dbo.AFFECTATION_VEHICULE a
+          WHERE a.ID_VEHICULE = v.ID_VEHICULE
+            AND a.DATE_FIN IS NULL
+            AND a.ID_AFFECTATION_VEHICULE <> i.ID_AFFECTATION_VEHICULE
+      );
+END;
+GO
+
+-- ------------------------------------------------------------
+-- TR3 : Mise à jour automatique du STATUT des entretiens
+--       Passe EN_RETARD si DATE_PREVUE dépassée et non réalisé
+--       (appelé via un job SQL Agent quotidien)
+-- ------------------------------------------------------------
+CREATE TRIGGER dbo.TR_ENTRETIEN_VEHICULE_UpdateStatut
+ON dbo.ENTRETIEN_VEHICULE
+AFTER UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Si DATE_REALISE vient d'être renseignée → REALISE
+    UPDATE dbo.ENTRETIEN_VEHICULE SET
+        STATUT           = 'REALISE',
+        DATE_MODIFICATION = SYSDATETIME()
+    WHERE ID_ENTRETIEN IN (
+        SELECT i.ID_ENTRETIEN FROM inserted i
+        INNER JOIN deleted  d ON d.ID_ENTRETIEN = i.ID_ENTRETIEN
+        WHERE i.DATE_REALISE IS NOT NULL
+          AND d.DATE_REALISE IS NULL
+    )
+    AND STATUT <> 'REALISE';
+END;
+GO
+
+-- Job SQL Agent recommandé (quotidien 06h00) :
+-- UPDATE dbo.ENTRETIEN_VEHICULE
+--   SET STATUT = 'EN_RETARD', DATE_MODIFICATION = SYSDATETIME()
+--   WHERE DATE_PREVUE < CAST(GETDATE() AS DATE)
+--     AND STATUT IN ('PLANIFIE','EN_COURS')
+--     AND DATE_REALISE IS NULL;
+
+
+-- ============================================================
+-- 8. VUES
+-- ============================================================
+
+-- ------------------------------------------------------------
+-- V1 : Dashboard parc — synthèse par véhicule
+-- ------------------------------------------------------------
+CREATE VIEW dbo.V_VEHICULE_DASHBOARD
+AS
+SELECT
+    v.ID_VEHICULE,
+    v.IMMATRICULATION,
+    v.MARQUE + ' ' + v.MODELE                          AS DESIGNATION,
+    v.TYPE_VEHICULE,
+    v.STATUT,
+    rs.LIBELLE                                          AS STATUT_LIBELLE,
+    rs.COULEUR_HEX,
+    v.KILOMETRAGE_ACTUEL,
+    v.ASSURANCE_EXPIRATION,
+    v.VIGNETTE_EXPIRATION,
+    v.VISITE_TECHNIQUE_EXPIRATION,
+
+    -- Dépenses totales (toutes)
+    ISNULL(dep.TOTAL_DEPENSES,   0)                    AS TOTAL_DEPENSES_XAF,
+    -- Dépenses liées à des INTERVENTION
+    ISNULL(dep.DEPENSES_MISSION, 0)                    AS DEPENSES_EN_MISSION_XAF,
+    -- Dépenses fixes hors intervention
+    ISNULL(dep.DEPENSES_FIXE,    0)                    AS DEPENSES_HORS_MISSION_XAF,
+
+    -- Kilométrage total parcouru en missions
+    ISNULL(aff.KM_MISSIONS,      0)                    AS KM_TOTAL_MISSIONS,
+    ISNULL(aff.NB_AFFECTATIONS,  0)                    AS NB_AFFECTATIONS,
+
+    -- Entretiens en retard
+    ISNULL(ent.NB_EN_RETARD,     0)                    AS ENTRETIENS_EN_RETARD,
+    ISNULL(ent.NB_PLANIFIE,      0)                    AS ENTRETIENS_PLANIFIES,
+
+    -- Alertes documentaires
+    CASE
+        WHEN v.ASSURANCE_EXPIRATION          < CAST(GETDATE() AS DATE) THEN 1
+        WHEN v.VISITE_TECHNIQUE_EXPIRATION   < CAST(GETDATE() AS DATE) THEN 1
+        WHEN v.VIGNETTE_EXPIRATION           < CAST(GETDATE() AS DATE) THEN 1
+        ELSE 0
+    END                                                AS A_DOCUMENT_EXPIRE,
+
+    CASE
+        WHEN v.ASSURANCE_EXPIRATION        BETWEEN CAST(GETDATE() AS DATE)
+                                               AND DATEADD(DAY, 30, GETDATE()) THEN 1
+        WHEN v.VISITE_TECHNIQUE_EXPIRATION BETWEEN CAST(GETDATE() AS DATE)
+                                               AND DATEADD(DAY, 30, GETDATE()) THEN 1
+        ELSE 0
+    END                                                AS A_DOCUMENT_EXPIRE_BIENTOT
+
+FROM dbo.VEHICULE v
+INNER JOIN dbo.REF_STATUT_VEHICULE rs ON rs.CODE = v.STATUT
+
+LEFT JOIN (
+    SELECT
+        ID_VEHICULE,
+        SUM(MONTANT_XAF)                                          AS TOTAL_DEPENSES,
+        SUM(CASE WHEN ID_INTERVENTION IS NOT NULL
+                 THEN MONTANT_XAF ELSE 0 END)                     AS DEPENSES_MISSION,
+        SUM(CASE WHEN ID_INTERVENTION IS NULL
+                 THEN MONTANT_XAF ELSE 0 END)                     AS DEPENSES_FIXE
+    FROM dbo.DEPENSE_VEHICULE
+    GROUP BY ID_VEHICULE
+) dep ON dep.ID_VEHICULE = v.ID_VEHICULE
+
+LEFT JOIN (
+    SELECT
+        ID_VEHICULE,
+        SUM(ISNULL(DISTANCE_KM, 0))                               AS KM_MISSIONS,
+        COUNT(*)                                                   AS NB_AFFECTATIONS
+    FROM dbo.AFFECTATION_VEHICULE
+    GROUP BY ID_VEHICULE
+) aff ON aff.ID_VEHICULE = v.ID_VEHICULE
+
+LEFT JOIN (
+    SELECT
+        ID_VEHICULE,
+        SUM(CASE WHEN STATUT = 'EN_RETARD' THEN 1 ELSE 0 END)    AS NB_EN_RETARD,
+        SUM(CASE WHEN STATUT = 'PLANIFIE'  THEN 1 ELSE 0 END)    AS NB_PLANIFIE
+    FROM dbo.ENTRETIEN_VEHICULE
+    GROUP BY ID_VEHICULE
+) ent ON ent.ID_VEHICULE = v.ID_VEHICULE
+
+WHERE v.EST_SUPPRIME = 0;
+GO
+
+-- ------------------------------------------------------------
+-- V2 : Dépenses par véhicule avec détail intervention
+-- ------------------------------------------------------------
+CREATE VIEW dbo.V_DEPENSES_PAR_VEHICULE
+AS
+SELECT
+    d.ID_DEPENSE,
+    d.ID_LOCATAIRE,
+    v.IMMATRICULATION,
+    v.MARQUE + ' ' + v.MODELE                          AS VEHICULE,
+    d.TYPE_DEPENSE,
+    rd.LIBELLE                                          AS TYPE_DEPENSE_LIBELLE,
+    rd.EST_DEDUCTIBLE,
+    d.MONTANT_XAF,
+    d.DATE_DEPENSE,
+    d.DESCRIPTION,
+    d.KILOMETRAGE_AU_MOMENT,
+    d.URL_JUSTIFICATIF,
+    -- Lien intervention
+    d.ID_INTERVENTION,
+    i.REFERENCE                                         AS INTERVENTION_REFERENCE,
+    i.TITRE                                             AS INTERVENTION_TITRE,
+    CASE
+        WHEN d.ID_INTERVENTION IS NOT NULL THEN 'MISSION'
+        ELSE                                    'HORS_MISSION'
+    END                                                AS CONTEXTE,
+    -- Opérateur
+    u.NOM_COMPLET                                      AS SAISIE_PAR,
+    d.DATE_CREATION
+FROM dbo.DEPENSE_VEHICULE d
+INNER JOIN dbo.VEHICULE              v  ON v.ID_VEHICULE    = d.ID_VEHICULE
+INNER JOIN dbo.REF_TYPE_DEPENSE_VEHICULE      rd ON rd.CODE          = d.TYPE_DEPENSE
+INNER JOIN dbo.UTILISATEUR          u  ON u.ID_UTILISATEUR = d.ID_SAISIE_PAR
+LEFT  JOIN dbo.INTERVENTION         i  ON i.ID_INTERVENTION = d.ID_INTERVENTION;
+GO
+
+-- ------------------------------------------------------------
+-- V3 : Alertes véhicules (documents + entretiens)
+-- ------------------------------------------------------------
+CREATE VIEW dbo.V_ALERTES_VEHICULE
+AS
+-- Assurances expirées
+SELECT
+    v.ID_LOCATAIRE,
+    v.ID_VEHICULE,
+    v.IMMATRICULATION,
+    'ASSURANCE_EXPIREE'                                AS TYPE_ALERTE,
+    'Assurance expirée le ' + FORMAT(v.ASSURANCE_EXPIRATION,'dd/MM/yyyy') AS MESSAGE,
+    DATEDIFF(DAY, v.ASSURANCE_EXPIRATION, GETDATE())  AS JOURS_RETARD,
+    'CRITIQUE'                                         AS NIVEAU
+FROM dbo.VEHICULE v
+WHERE v.EST_SUPPRIME = 0
+  AND v.ASSURANCE_EXPIRATION IS NOT NULL
+  AND v.ASSURANCE_EXPIRATION < CAST(GETDATE() AS DATE)
+
+UNION ALL
+
+-- Visites techniques expirées
+SELECT
+    v.ID_LOCATAIRE, v.ID_VEHICULE, v.IMMATRICULATION,
+    'VISITE_EXPIREE',
+    'Visite technique expirée le ' + FORMAT(v.VISITE_TECHNIQUE_EXPIRATION,'dd/MM/yyyy'),
+    DATEDIFF(DAY, v.VISITE_TECHNIQUE_EXPIRATION, GETDATE()),
+    'CRITIQUE'
+FROM dbo.VEHICULE v
+WHERE v.EST_SUPPRIME = 0
+  AND v.VISITE_TECHNIQUE_EXPIRATION IS NOT NULL
+  AND v.VISITE_TECHNIQUE_EXPIRATION < CAST(GETDATE() AS DATE)
+
+UNION ALL
+
+-- Documents expirant dans 30 jours
+SELECT
+    v.ID_LOCATAIRE, v.ID_VEHICULE, v.IMMATRICULATION,
+    'ASSURANCE_BIENTOT',
+    'Assurance expire dans ' + CAST(DATEDIFF(DAY,GETDATE(),v.ASSURANCE_EXPIRATION) AS NVARCHAR) + ' jour(s)',
+    NULL,
+    'AVERTISSEMENT'
+FROM dbo.VEHICULE v
+WHERE v.EST_SUPPRIME = 0
+  AND v.ASSURANCE_EXPIRATION BETWEEN CAST(GETDATE() AS DATE)
+                                 AND DATEADD(DAY, 30, GETDATE())
+
+UNION ALL
+
+-- Entretiens en retard
+SELECT
+    e.ID_LOCATAIRE,
+    e.ID_VEHICULE,
+    v.IMMATRICULATION,
+    'ENTRETIEN_EN_RETARD',
+    e.TYPE_ENTRETIEN + ' prévu le ' + FORMAT(e.DATE_PREVUE,'dd/MM/yyyy') + ' — en retard',
+    DATEDIFF(DAY, e.DATE_PREVUE, GETDATE()),
+    'AVERTISSEMENT'
+FROM dbo.ENTRETIEN_VEHICULE e
+INNER JOIN dbo.VEHICULE v ON v.ID_VEHICULE = e.ID_VEHICULE
+WHERE e.STATUT IN ('PLANIFIE', 'EN_RETARD')
+  AND e.DATE_PREVUE < CAST(GETDATE() AS DATE);
+GO
+
+
+-- ============================================================
+-- 9. REQUÊTES UTILES (exemples)
+-- ============================================================
+
+-- 9.1 Coût total par véhicule ce mois-ci
+-- SELECT
+--     v.IMMATRICULATION,
+--     SUM(d.MONTANT_XAF)                         AS TOTAL_MOIS,
+--     SUM(CASE WHEN d.ID_INTERVENTION IS NOT NULL
+--              THEN d.MONTANT_XAF ELSE 0 END)    AS EN_MISSION,
+--     SUM(CASE WHEN d.ID_INTERVENTION IS NULL
+--              THEN d.MONTANT_XAF ELSE 0 END)    AS HORS_MISSION
+-- FROM dbo.DEPENSE_VEHICULE d
+-- INNER JOIN dbo.VEHICULE v ON v.ID_VEHICULE = d.ID_VEHICULE
+-- WHERE d.DATE_DEPENSE >= DATEFROMPARTS(YEAR(GETDATE()), MONTH(GETDATE()), 1)
+-- GROUP BY v.IMMATRICULATION
+-- ORDER BY TOTAL_MOIS DESC;
+
+-- 9.2 Kilométrage par intervention (coût au km)
+-- SELECT
+--     i.REFERENCE,
+--     i.TITRE,
+--     SUM(a.DISTANCE_KM)                         AS KM_TOTAL,
+--     SUM(d.MONTANT_XAF)                         AS DEPENSES_LIEES,
+--     CASE WHEN SUM(a.DISTANCE_KM) > 0
+--          THEN SUM(d.MONTANT_XAF) / SUM(a.DISTANCE_KM)
+--          ELSE NULL END                         AS COUT_PAR_KM
+-- FROM dbo.INTERVENTION i
+-- LEFT JOIN dbo.AFFECTATION_VEHICULE a ON a.ID_INTERVENTION = i.ID_INTERVENTION
+-- LEFT JOIN dbo.DEPENSE_VEHICULE     d ON d.ID_INTERVENTION = i.ID_INTERVENTION
+-- GROUP BY i.ID_INTERVENTION, i.REFERENCE, i.TITRE;
+
+-- 9.3 Toutes les alertes actives pour un tenant
+-- SELECT * FROM dbo.V_ALERTES_VEHICULE
+-- WHERE ID_LOCATAIRE = '<GUID_TENANT>'
+-- ORDER BY NIVEAU DESC, JOURS_RETARD DESC;
+
+-- ============================================================
+-- FIN DU SCRIPT — FieldOps Africa · Module Parc Véhicules
+-- ============================================================

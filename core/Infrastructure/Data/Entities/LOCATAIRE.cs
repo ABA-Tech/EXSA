@@ -27,7 +27,11 @@ public partial class LOCATAIRE
 
     public virtual ICollection<ARTICLE_STOCK> ARTICLE_STOCKs { get; set; } = new List<ARTICLE_STOCK>();
 
+    public virtual ICollection<DEPENSE_VEHICULE> DEPENSE_VEHICULEs { get; set; } = new List<DEPENSE_VEHICULE>();
+
     public virtual ICollection<EMPLOYE> EMPLOYEs { get; set; } = new List<EMPLOYE>();
+
+    public virtual ICollection<ENTRETIEN_VEHICULE> ENTRETIEN_VEHICULEs { get; set; } = new List<ENTRETIEN_VEHICULE>();
 
     public virtual ICollection<FACTURE> FACTUREs { get; set; } = new List<FACTURE>();
 
@@ -36,4 +40,6 @@ public partial class LOCATAIRE
     public virtual REF_TYPE_PLAN TYPE_PLANNavigation { get; set; } = null!;
 
     public virtual ICollection<UTILISATEUR> UTILISATEURs { get; set; } = new List<UTILISATEUR>();
+
+    public virtual ICollection<VEHICULE> VEHICULEs { get; set; } = new List<VEHICULE>();
 }
