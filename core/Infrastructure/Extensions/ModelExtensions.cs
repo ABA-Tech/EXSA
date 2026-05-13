@@ -357,5 +357,166 @@ namespace Infrastructure.Extensions
         {
             return entities.Select(x => x.ToModel());
         }
+
+        public static Vehicule ToModel(this VEHICULE entity)
+        {
+            return new Vehicule
+            {
+                IdVehicule = entity.ID_VEHICULE,
+                IdLocataire = entity.ID_LOCATAIRE,
+                Immatriculation = entity.IMMATRICULATION,
+                Marque = entity.MARQUE,
+                Modele = entity.MODELE,
+                Annee = entity.ANNEE,
+                TypeVehicule = entity.TYPE_VEHICULE,
+                Couleur = entity.COULEUR,
+                KilometrageActuel = entity.KILOMETRAGE_ACTUEL,
+                DateAcquisition = entity.DATE_ACQUISITION,
+                PrixAcquisitionXaf = entity.PRIX_ACQUISITION_XAF,
+                AssuranceCompagnie = entity.ASSURANCE_COMPAGNIE,
+                AssuranceNumero = entity.ASSURANCE_NUMERO,
+                AssuranceExpiration = entity.ASSURANCE_EXPIRATION,
+                VignetteExpiration = entity.VIGNETTE_EXPIRATION,
+                VisiteTechniqueExpiration = entity.VISITE_TECHNIQUE_EXPIRATION,
+                Statut = entity.STATUT,
+                UrlPhoto = entity.URL_PHOTO,
+                Notes = entity.NOTES,
+                IdCreateur = entity.ID_CREATEUR,
+                DateCreation = entity.DATE_CREATION,
+                DateModification = entity.DATE_MODIFICATION,
+                EstSupprime = entity.EST_SUPPRIME
+            };
+        }
+
+        public static VEHICULE ToEntity(this Vehicule model)
+        {
+            return new VEHICULE
+            {
+                ID_VEHICULE = model.IdVehicule,
+                ID_LOCATAIRE = model.IdLocataire,
+                IMMATRICULATION = model.Immatriculation,
+                MARQUE = model.Marque,
+                MODELE = model.Modele,
+                ANNEE = model.Annee,
+                TYPE_VEHICULE = model.TypeVehicule,
+                COULEUR = model.Couleur,
+                KILOMETRAGE_ACTUEL = model.KilometrageActuel,
+                DATE_ACQUISITION = model.DateAcquisition,
+                PRIX_ACQUISITION_XAF = model.PrixAcquisitionXaf,
+                ASSURANCE_COMPAGNIE = model.AssuranceCompagnie,
+                ASSURANCE_NUMERO = model.AssuranceNumero,
+                ASSURANCE_EXPIRATION = model.AssuranceExpiration,
+                VIGNETTE_EXPIRATION = model.VignetteExpiration,
+                VISITE_TECHNIQUE_EXPIRATION = model.VisiteTechniqueExpiration,
+                STATUT = model.Statut,
+                URL_PHOTO = model.UrlPhoto,
+                NOTES = model.Notes,
+                ID_CREATEUR = model.IdCreateur,
+                DATE_CREATION = model.DateCreation,
+                DATE_MODIFICATION = model.DateModification,
+                EST_SUPPRIME = model.EstSupprime
+            };
+        }
+
+        public static IEnumerable<Vehicule> ToModelCollection(this IEnumerable<VEHICULE> entities)
+        {
+            return entities.Select(e => e.ToModel());
+        }
+
+        public static DepenseVehicule ToModel(this DEPENSE_VEHICULE entity)
+        {
+            return new DepenseVehicule
+            {
+                IdDepense = entity.ID_DEPENSE,
+                IdLocataire = entity.ID_LOCATAIRE,
+                IdVehicule = entity.ID_VEHICULE,
+                IdIntervention = entity.ID_INTERVENTION,
+                IdSaisiePar = entity.ID_SAISIE_PAR,
+                TypeDepense = entity.TYPE_DEPENSE,
+                MontantXaf = entity.MONTANT_XAF,
+                DateDepense = entity.DATE_DEPENSE,
+                Description = entity.DESCRIPTION,
+                KilometrageAuMoment = entity.KILOMETRAGE_AU_MOMENT,
+                UrlJustificatif = entity.URL_JUSTIFICATIF,
+                DateCreation = entity.DATE_CREATION,
+                DateModification = entity.DATE_MODIFICATION
+            };
+        }
+
+        public static DEPENSE_VEHICULE ToEntity(this DepenseVehicule model)
+        {
+            return new DEPENSE_VEHICULE
+            {
+                ID_DEPENSE = model.IdDepense,
+                ID_LOCATAIRE = model.IdLocataire,
+                ID_VEHICULE = model.IdVehicule,
+                ID_INTERVENTION = model.IdIntervention,
+                ID_SAISIE_PAR = model.IdSaisiePar,
+                TYPE_DEPENSE = model.TypeDepense,
+                MONTANT_XAF = model.MontantXaf,
+                DATE_DEPENSE = model.DateDepense,
+                DESCRIPTION = model.Description,
+                KILOMETRAGE_AU_MOMENT = model.KilometrageAuMoment,
+                URL_JUSTIFICATIF = model.UrlJustificatif,
+                DATE_CREATION = model.DateCreation,
+                DATE_MODIFICATION = model.DateModification
+            };
+        }
+
+        public static IEnumerable<DepenseVehicule> ToModelCollection(this IEnumerable<DEPENSE_VEHICULE> entities)
+        {
+            return entities.Select(e => e.ToModel());
+        }
+
+        public static EntretienVehicule ToModel(this ENTRETIEN_VEHICULE entity)
+        {
+            return new EntretienVehicule
+            {
+                IdEntretien = entity.ID_ENTRETIEN,
+                IdLocataire = entity.ID_LOCATAIRE,
+                IdVehicule = entity.ID_VEHICULE,
+                IdDepense = entity.ID_DEPENSE,
+                TypeEntretien = entity.TYPE_ENTRETIEN,
+                DatePrevue = entity.DATE_PREVUE,
+                KilometragePrevu = entity.KILOMETRAGE_PREVU,
+                Prestataire = entity.PRESTATAIRE,
+                DateRealise = entity.DATE_REALISE,
+                KilometrageRealise = entity.KILOMETRAGE_REALISE,
+                CoutXaf = entity.COUT_XAF,
+                Statut = entity.STATUT,
+                Notes = entity.NOTES,
+                IdCreateur = entity.ID_CREATEUR,
+                DateCreation = entity.DATE_CREATION,
+                DateModification = entity.DATE_MODIFICATION
+            };
+        }
+
+        public static ENTRETIEN_VEHICULE ToEntity(this EntretienVehicule model)
+        {
+            return new ENTRETIEN_VEHICULE
+            {
+                ID_ENTRETIEN = model.IdEntretien,
+                ID_LOCATAIRE = model.IdLocataire,
+                ID_VEHICULE = model.IdVehicule,
+                ID_DEPENSE = model.IdDepense,
+                TYPE_ENTRETIEN = model.TypeEntretien,
+                DATE_PREVUE = model.DatePrevue,
+                KILOMETRAGE_PREVU = model.KilometragePrevu,
+                PRESTATAIRE = model.Prestataire,
+                DATE_REALISE = model.DateRealise,
+                KILOMETRAGE_REALISE = model.KilometrageRealise,
+                COUT_XAF = model.CoutXaf,
+                STATUT = model.Statut,
+                NOTES = model.Notes,
+                ID_CREATEUR = model.IdCreateur,
+                DATE_CREATION = model.DateCreation,
+                DATE_MODIFICATION = model.DateModification
+            };
+        }
+
+        public static IEnumerable<EntretienVehicule> ToModelCollection(this IEnumerable<ENTRETIEN_VEHICULE> entities)
+        {
+            return entities.Select(e => e.ToModel());
+        }
     }
 }

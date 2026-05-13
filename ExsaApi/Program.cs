@@ -36,6 +36,22 @@ builder.Services.AddScoped<IReferentielStore, ReferentielStore>();
 builder.Services.AddScoped<IArticleStockStore, ArticleStockStore>();
 builder.Services.AddScoped<IMouvementStockStore, MouvementStockStore>();
 
+builder.Services.AddScoped<IVehiculeStore, VehiculeStore>();
+builder.Services.AddScoped<IDepenseVehiculeStore, DepenseVehiculeStore>();
+builder.Services.AddScoped<IEntretienVehiculeStore, EntretienVehiculeStore>();
+
+builder.Services.AddScoped<IVehiculeService, VehiculeService>();
+builder.Services.AddScoped<IDepenseVehiculeService, DepenseVehiculeService>();
+builder.Services.AddScoped<IEntretienVehiculeService, EntretienVehiculeService>();
+
+builder.Services.AddScoped<IVehiculeDashboardStore, VehiculeDashboardStore>();
+builder.Services.AddScoped<IDepenseParVehiculeStore, DepenseParVehiculeStore>();
+builder.Services.AddScoped<IAlerteVehiculeStore, AlerteVehiculeStore>();
+
+builder.Services.AddScoped<IVehiculeDashboardService, VehiculeDashboardService>();
+builder.Services.AddScoped<IDepenseParVehiculeService, DepenseParVehiculeService>();
+builder.Services.AddScoped<IAlerteVehiculeService, AlerteVehiculeService>();
+
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

@@ -91,8 +91,12 @@ public partial class ExsaDbContext : DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseSqlServer("Name=ConnectionStrings:Default");
 
+    public DbSet<RationTransportOutput> RationTransportOutputs { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+
+        modelBuilder.Entity<RationTransportOutput>().HasNoKey().ToView(null);
         modelBuilder.Entity<AFFECTATION_INTERVENTION>(entity =>
         {
             entity.HasKey(e => e.ID_AFFECTATION);
