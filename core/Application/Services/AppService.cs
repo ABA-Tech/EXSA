@@ -32,9 +32,9 @@ namespace Application.Services
             await _repository.DeleteAsync(model);
         }
 
-        public async Task<IEnumerable<T>> GetAllAsync()
+        public async Task<IEnumerable<T>> GetAllAsync(string filter = null)
         {
-            return await _repository.GetAllAsync();
+            return await _repository.GetAllAsync(filter);
         }
 
         public async Task<T> GetByIdAsync(Guid id)

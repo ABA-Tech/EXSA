@@ -34,7 +34,7 @@ namespace Infrastructure.Stores
             throw new NotImplementedException();
         }
 
-        public async Task<IEnumerable<Utilisateur>> GetAllAsync()
+        public async Task<IEnumerable<Utilisateur>> GetAllAsync(string filter = null)
         {
             return (await _context.UTILISATEURs.ToListAsync()).ToModelCollection();
         }

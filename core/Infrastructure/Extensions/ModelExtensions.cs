@@ -284,5 +284,78 @@ namespace Infrastructure.Extensions
             return models.Select(x => x.ToModel());
         }
 
+        public static ArticleStock ToModel(this ARTICLE_STOCK entity)
+        {
+            return new ArticleStock
+            {
+                DateCreation = entity.DATE_CREATION,
+                DateModification = entity.DATE_MODIFICATION,
+                IdArticle = entity.ID_ARTICLE,
+                IdLocataire = entity.ID_LOCATAIRE,
+                Nom = entity.NOM,
+                Reference = entity.REFERENCE,
+                PrixUnitaire = entity.PRIX_UNITAIRE_XAF,
+                StockActuel = entity.STOCK_ACTUEL,
+                StockMinimum = entity.STOCK_MINIMUM,
+                Unite = entity.UNITE
+            };
+        }
+
+        public static ARTICLE_STOCK ToEntity(this ArticleStock model)
+        {
+            return new ARTICLE_STOCK
+            {
+                STOCK_ACTUEL = model.StockActuel,
+                DATE_CREATION = model.DateCreation.Value,
+                DATE_MODIFICATION = model.DateModification,
+                ID_ARTICLE = model.IdArticle,
+                ID_LOCATAIRE = model.IdLocataire.Value,
+                NOM = model.Nom,
+                PRIX_UNITAIRE_XAF = model.PrixUnitaire,
+                REFERENCE = model.Reference,
+                UNITE = model.Unite,
+                STOCK_MINIMUM = model.StockMinimum
+            };
+        }
+
+        public static IEnumerable<ArticleStock> ToModelCollection(this IEnumerable<ARTICLE_STOCK> entities)
+        {
+            return entities.Select(x => x.ToModel());
+        }
+
+        public static MouvementStock ToModel(this MOUVEMENT_STOCK entity)
+        {
+            return new MouvementStock
+            {
+                DateMouvement = entity.DATE_MOUVEMENT,
+                IdArticle = entity.ID_ARTICLE,
+                IdIntervention = entity.ID_INTERVENTION,
+                IdMouvement = entity.ID_MOUVEMENT,
+                IdOperateur = entity.ID_OPERATEUR,
+                Quantite = entity.QUANTITE,
+                TypeMouvement = entity.TYPE_MOUVEMENT,
+                ArticleNavigation = entity.ID_ARTICLENavigation?.ToModel(),
+                Intervention = entity.ID_INTERVENTIONNavigation?.ToModel(),
+            };
+        }
+
+        public static MOUVEMENT_STOCK ToEntity(this MouvementStock model)
+        {
+            return new MOUVEMENT_STOCK
+            {
+                TYPE_MOUVEMENT = model.TypeMouvement,
+                DATE_MOUVEMENT = model.DateMouvement,
+                ID_ARTICLE = model.IdArticle,
+                ID_INTERVENTION = model.IdIntervention,
+                ID_MOUVEMENT = model.IdMouvement,
+                ID_OPERATEUR = model.IdOperateur,
+                QUANTITE = model.Quantite
+            };
+        }
+
+        public static IEnumerable<MouvementStock> ToModelCollection(this IEnumerable<MOUVEMENT_STOCK> entities)
+        {
+            return entities.Select(x => x.ToModel());
+        }
     }
 }

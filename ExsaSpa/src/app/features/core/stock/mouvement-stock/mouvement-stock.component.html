@@ -1,0 +1,65 @@
+<p-dialog [(visible)]="ouvrirDialog"  [style]="{ width: '500px' }" header="mouvement de stock" [modal]="true">
+    <ng-template #content>
+        <div class="flex flex-col gap-6 mt-7">
+            <div>
+                <label for="name" class="block font-bold mb-3">Type de mouvement <p-tag value="IN | OUT" severity="info"/></label>
+                <!-- <input type="text" pInputText id="name" [(ngModel)]="mvtStock.typeMouvement" required autofocus fluid /> -->
+                <p-tag class="mr-5" *ngFor="let mvt of typeMvtStock()" icon="pi pi-arrow-{{getIcone(mvt.code)}}" [value]="mvt.libelle" (click)="mvtStock.typeMouvement = mvt.code" [severity]="mvtStock.typeMouvement === mvt.code ? 'success' : 'secondary'"></p-tag>
+                <small class="text-red-500" *ngIf="submitted && !mvtStock.typeMouvement">Le type de mouvement est requis.</small>
+            </div>
+        </div>
+
+        @if(mvtStock.typeMouvement == 'SORTIE') {
+            <div>
+                <div class="grid grid-cols-12 gap-4 mt-6">
+                    <div class="col-span-12">
+                        <label for="intervention" class="block font-bold mb-3">Choisir l'intervention (optionnel)</label>
+                        <p-select class="w-full" [filter]="true" filterBy="titre" [showClear]="true" style="width:100%;" [options]="interventionList()" [(ngModel)]="mvtStock.intervention" optionLabel="titre" placeholder="Choisir l'intervention" class="w-full md:w-80" />
+                    </div>
+                </div>
+            </div>
+        }
+
+        <div>
+            <div class="grid grid-cols-12 gap-4 mt-6">
+                <div class="col-span-12">
+                    <label for="articleNavigation" class="block font-bold mb-3">Article</label>
+                    <p-select class="w-full" style="width:100%;" [options]="articleList()" [(ngModel)]="mvtStock.articleNavigation" optionLabel="nom" placeholder="Choisir l'article" class="w-full md:w-80" />
+                    <small class="text-red-500" *ngIf="submitted && !mvtStock.articleNavigation">L'article est requis.</small>
+                </div>
+            </div>
+        </div>
+        <div>
+            <div class="grid grid-cols-12 gap-4 mt-6">
+                <div class="col-span-12">
+                    <label for="quantite" class="block font-bold mb-3">Quantité</label>
+                    <p-inputnumber id="quantite" [(ngModel)]="mvtStock.quantite" fluid />
+                    <small class="text-red-500" *ngIf="submitted && !mvtStock.quantite">La quantité est requise.</small>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="grid grid-cols-12 gap-4 mt-6">
+                <div class="col-span-12">
+                    <label for="date" class="block font-bold mb-3">Enregistré le</label>
+                    <p-datepicker id="date" [(ngModel)]="mvtStock.dateMouvement" fluid />
+                    <small class="text-red-500" *ngIf="submitted && !mvtStock.dateMouvement">La date est requise.</small>
+                </div>
+            </div>
+        </div>
+
+            <!-- <div>
+                <label for="articleNavigation" class="block font-bold mb-3">Article</label>
+                <p-select [options]="articleList()" [(ngModel)]="mvtStock.articleNavigation" optionLabel="nom" placeholder="Choisir l'article" class="w-full md:w-80" />
+                <small class="text-red-500" *ngIf="submitted && !mvtStock.articleNavigation">L'article est requis.</small>
+            </div> -->
+
+        <!-- </div> -->
+    </ng-template>
+
+    <ng-template #footer>
+        <p-button label="Fermer" icon="pi pi-times" text (click)="hideDialog()" />
+        <p-button label="Enregistrer" icon="pi pi-check" (click)="enregistrerMvt()" />
+    </ng-template>
+</p-dialog>

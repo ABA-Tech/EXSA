@@ -1,5 +1,5 @@
 
-<p-toolbar styleClass="mb-6">
+<p-toolbar>
     <ng-template #start>
         <p-button label="New" icon="pi pi-plus" severity="secondary" class="mr-2" (click)="openNew()" />
         <!-- <p-button severity="secondary" label="Delete" icon="pi pi-trash" outlined (onClick)="deleteSelectedemployes()" [disabled]="!selectedemployes || !selectedemployes.length" /> -->
@@ -131,7 +131,7 @@
             <div class="grid grid-cols-12 gap-4">
                 <div class="col-span-5">
                     <label for="salaireBaseXaf" class="block font-bold mb-3">Salaire de base</label>
-                    <p-inputnumber id="salaireBaseXaf" [(ngModel)]="createEmpDto.salaireBaseXaf" mode="currency" currency="USD" locale="en-US" fluid />
+                    <p-inputnumber id="salaireBaseXaf" [(ngModel)]="createEmpDto.salaireBaseXaf" mode="currency" currency="XAF" locale="en-US" fluid />
                     <small class="text-red-500" *ngIf="submitted && !createEmpDto.salaireBaseXaf">Le salaire de base est requis.</small>
                 </div>
                 <div class="col-span-3">

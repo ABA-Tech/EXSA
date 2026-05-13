@@ -23,6 +23,8 @@ builder.Services.AddScoped<IAppService<Intervention>, AppService<Intervention>>(
 builder.Services.AddScoped<IInterventionService, InterventionService>();
 builder.Services.AddScoped<IAppService<Utilisateur>, AppService<Utilisateur>>();
 builder.Services.AddScoped<IReferentielService, ReferentielService>();
+builder.Services.AddScoped<IArticleStockService, ArticleStockService>();
+builder.Services.AddScoped<IMouvementStockService, MouvementStockService>();
 
 // Injection des dépendances de stores
 builder.Services.AddScoped<IRepository<Intervention>, InterventionStore>();
@@ -31,6 +33,8 @@ builder.Services.AddScoped<ILocataireStore, LocataireStore>();
 builder.Services.AddScoped<IEmployeStore, EmployeStore>();
 builder.Services.AddScoped<IInterventionStore, InterventionStore>();
 builder.Services.AddScoped<IReferentielStore, ReferentielStore>();
+builder.Services.AddScoped<IArticleStockStore, ArticleStockStore>();
+builder.Services.AddScoped<IMouvementStockStore, MouvementStockStore>();
 
 
 builder.Services.AddControllers();

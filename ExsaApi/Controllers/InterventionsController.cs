@@ -28,9 +28,9 @@ namespace ExsaApi.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllInterventions()
+        public async Task<IActionResult> GetAllInterventions(string status = null)
         {
-            var interventions = await _interventionService.GetAllAsync();
+            var interventions = await _interventionService.GetAllAsync(status);
             return Ok(interventions);
         }
 

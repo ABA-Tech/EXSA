@@ -110,8 +110,6 @@ export class EmployeeList {
 
     loadEmployeData() {
         this.employeService.getAll().subscribe(e=>{
-            console.log(e);
-
             this.employes.set(e);
         });
 
@@ -162,8 +160,13 @@ export class EmployeeList {
             return;
         }
 
-        var res = this.createEmpDto.dateEmbauche.split(" ")[0].split("/");
-        this.createEmpDto.dateEmbauche = `${res[2]}-${res[1]}-${res[0]}`;
+        try {
+            var res = this.createEmpDto.dateEmbauche.split(" ")[0].split("/");
+            this.createEmpDto.dateEmbauche = `${res[2]}-${res[1]}-${res[0]}`;
+        } catch (error) {
+            console.log(error)
+        }
+
         if (this.createEmpDto.idEmploye) {
             this.employeService.UpdateEmployee(this.createEmpDto).subscribe({
                 next: (res) => {

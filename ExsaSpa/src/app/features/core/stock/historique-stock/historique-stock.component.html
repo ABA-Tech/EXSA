@@ -1,0 +1,65 @@
+<p-table
+    #dt
+    [value]="listMvtStock()"
+    [rows]="10"
+    [paginator]="true"
+    [globalFilterFields]="['article', 'reference', 'status']"
+    [rowHover]="true"
+    dataKey="id"
+    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} historique"
+    [showCurrentPageReport]="true"
+    [rowsPerPageOptions]="[10, 20, 30]"
+    class="mt-5"
+>
+    <ng-template #caption>
+        <div class="flex items-center justify-between">
+            <h5 class="m-0">Historique</h5>
+            <p-iconfield>
+                <p-inputicon styleClass="pi pi-search" />
+                <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Search..." />
+            </p-iconfield>
+        </div>
+    </ng-template>
+    <ng-template #header>
+        <tr>
+            <th pSortableColumn="articleNavigation.nom">
+                Article
+                <p-sortIcon field="articleNavigation.nom" />
+            </th>
+            <!-- <th>Image</th> -->
+            <th pSortableColumn="typeMouvement">
+                Type
+                <p-sortIcon field="typeMouvement" />
+            </th>
+            <th pSortableColumn="quantite">
+                Quantité
+                <p-sortIcon field="quantite" />
+            </th>
+            <th pSortableColumn="intervention">
+                Intervention
+                <p-sortIcon field="idIntervention" />
+            </th>
+            <th pSortableColumn="dateMouvement">
+                Date
+                <p-sortIcon field="dateMouvement" />
+            </th>
+        </tr>
+    </ng-template>
+    <ng-template #body let-item>
+        <tr>
+            <!-- <td>
+                <p-tag severity="secondary" [value]="item.reference"/>
+            </td> -->
+            <td>
+                {{ item.articleNavigation?.nom }}
+            </td>
+            <td>
+                <p-tag [icon]="getTypeIcon(item.typeMouvement)" [severity]="getServerity(item.typeMouvement)" value="{{ getTypeLabel(item.typeMouvement) }}"/>
+            </td>
+            <td>{{ item.quantite }}</td>
+            <td>{{ item.intervention?.reference ?? '--' }}</td>
+            <td>{{ item.dateMouvement | date }}</td>
+        </tr>
+    </ng-template>
+</p-table>
+

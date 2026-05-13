@@ -21,7 +21,7 @@ public partial class ArticleStock
 
     public decimal? PrixUnitaire { get; set; }
 
-    public DateTime DateCreation { get; set; }
+    public DateTime? DateCreation { get; set; }
 
     public DateTime? DateModification { get; set; }
 

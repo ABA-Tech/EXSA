@@ -63,9 +63,9 @@ namespace Infrastructure.Stores
             throw new NotImplementedException();
         }
 
-        public async Task<IEnumerable<Intervention>> GetAllAsync()
+        public async Task<IEnumerable<Intervention>> GetAllAsync(string status = null)
         {
-            return (await _dbContext.INTERVENTIONs.Include(x=>x.STATUTNavigation).ToListAsync()).ToModelCollection();
+            return (await _dbContext.INTERVENTIONs.Include(x=>x.STATUTNavigation).Where(x=>status == null || x.STATUT == status).ToListAsync()).ToModelCollection();
         }
 
         public async Task<Intervention> GetByIdAsync(Guid id)

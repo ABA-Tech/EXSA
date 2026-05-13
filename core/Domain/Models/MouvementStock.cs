@@ -19,10 +19,10 @@ public partial class MouvementStock
 
     public DateTime DateMouvement { get; set; }
 
-    public virtual ArticleStock? IdArticleNavigation { get; set; } = null!;
+    public virtual ArticleStock? ArticleNavigation { get; set; } = null!;
 
-    public virtual Intervention? IdIntervention { get; set; }
+    public virtual Intervention? Intervention { get; set; }
 
 
-    public virtual RefTypeMouvement? TypeMouvement { get; set; } = null!;
+    public virtual RefTypeMouvement? TypeMouvementNavigation { get; set; } = null!;
 }
