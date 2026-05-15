@@ -56,5 +56,20 @@ namespace Application.Services
         {
             return await _referentielStore.GetTypeDepenseInterventionsAsync();
         }
+
+        public async Task<IEnumerable<RefTypeVehicule>> GetAllTypeVehiculesAsync()
+        {
+            return await _referentielStore.GetTypeVehiculesAsync();
+        }
+
+        public async Task<IEnumerable<RefStatutVehicule>> GetAllStatusVehiculeAsync()
+        {
+            return await _referentielStore.GetStatusVehiculeAsync();
+        }
+
+        public async Task<IEnumerable<RefTypeDepenseVehicule>> GetAllTypeDepenseVehiculeAsync()
+        {
+            return await _referentielStore.GetTypeDepenseVehiculeAsync();
+        }
     }
 }

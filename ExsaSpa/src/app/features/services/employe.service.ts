@@ -71,7 +71,7 @@ export class EmployeService extends ApiService<Employee> {
 
 @Injectable()
 export class ReferentielService {
-
+    
     protected httpClient =  inject(HttpClient);
     readonly baseUrl = 'https://localhost:7118/api/Referentiels';
 

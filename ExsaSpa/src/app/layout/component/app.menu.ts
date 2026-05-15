@@ -28,8 +28,9 @@ export class AppMenu {
                 label: 'Ressources humaines',
                 path: '/rh',
                 items: [
-                    { label: 'Stocks', icon: 'pi pi-fw pi-home', routerLink: ['/rh/stocks'] },
-                    { label: 'Employés', icon: 'pi pi-fw pi-home', routerLink: ['/rh/employes'] },
+                    { label: 'Vehicules', icon: 'pi pi-fw pi-car', routerLink: ['/rh/vehicules'] },
+                    { label: 'Stocks', icon: 'pi pi-fw pi-shopping-bag', routerLink: ['/rh/stocks'] },
+                    { label: 'Employés', icon: 'pi pi-fw pi-users', routerLink: ['/rh/employes'] },
                     { label: 'Liste des interventions', icon: 'pi pi-fw pi-home', routerLink: ['/rh/interventions'] }
                 ]
             }

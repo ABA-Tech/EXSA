@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 
 namespace Domain.Models;
 
@@ -48,5 +49,6 @@ public class Vehicule
 
     public DateTime? DateModification { get; set; }
 
+    public IFormFile? FichierPhoto { get; set; }
     public bool EstSupprime { get; set; }
 }

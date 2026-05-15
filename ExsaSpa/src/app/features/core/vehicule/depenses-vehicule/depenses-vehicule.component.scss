@@ -1,0 +1,215 @@
+/* src/app/features/depenses-vehicules/pages/depenses-vehicules.component.scss */
+
+:host {
+  display: block;
+}
+
+.page {
+  padding: 1.5rem;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+
+  h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+
+  p {
+    margin: 0.25rem 0 0;
+    color: var(--text-color-secondary);
+  }
+}
+
+.erp-card {
+  background: var(--surface-card);
+  border: 1px solid var(--surface-border);
+  border-radius: 16px;
+  padding: 1rem;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+}
+
+.table-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+
+  h2 {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 700;
+  }
+
+  span {
+    display: inline-block;
+    margin-top: 0.25rem;
+    color: var(--text-color-secondary);
+    font-size: 0.875rem;
+  }
+
+  input {
+    width: min(360px, 100%);
+  }
+}
+
+.text-right {
+  text-align: right;
+}
+
+.actions-col {
+  width: 140px;
+  text-align: center;
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+.link {
+  color: var(--primary-color);
+  font-weight: 600;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.muted {
+  color: var(--text-color-secondary);
+}
+
+.empty-state {
+  display: grid;
+  place-items: center;
+  gap: 0.5rem;
+  padding: 2rem;
+  color: var(--text-color-secondary);
+
+  i {
+    font-size: 2rem;
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
+.erp-form {
+  padding-top: 0.5rem;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+
+  label {
+    font-weight: 600;
+  }
+
+  label span {
+    color: var(--red-500);
+  }
+
+  small {
+    color: var(--red-500);
+  }
+
+  .file-name {
+    color: var(--text-color-secondary);
+  }
+}
+
+.field-full {
+  grid-column: 1 / -1;
+}
+
+:host ::ng-deep {
+  .field p-inputnumber,
+  .field p-datepicker,
+  .field p-select {
+    width: 100%;
+  }
+
+  .field .p-inputnumber,
+  .field .p-datepicker,
+  .field .p-select {
+    width: 100%;
+  }
+
+  textarea {
+    width: 100%;
+    resize: vertical;
+  }
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+
+  div {
+    padding: 0.75rem;
+    border: 1px solid var(--surface-border);
+    border-radius: 12px;
+    background: var(--surface-ground);
+  }
+
+  span {
+    display: block;
+    color: var(--text-color-secondary);
+    font-size: 0.8125rem;
+    margin-bottom: 0.25rem;
+  }
+
+  strong {
+    font-size: 0.95rem;
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
+.detail-full {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 768px) {
+  .page {
+    padding: 1rem;
+  }
+
+  .page-header,
+  .table-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .form-grid,
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .field-full,
+  .detail-full {
+    grid-column: auto;
+  }
+}

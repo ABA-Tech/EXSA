@@ -1,0 +1,412 @@
+<!-- src/app/features/depenses-vehicules/pages/depenses-vehicules.component.html -->
+
+<p-toast></p-toast>
+
+<p-confirmDialog
+  [style]="{ width: '420px' }"
+  [breakpoints]="{ '960px': '75vw', '640px': '95vw' }"
+></p-confirmDialog>
+
+<section class="page">
+  <div class="page-header">
+    <div>
+      <h1>Dépenses véhicules</h1>
+      <p>Gestion des charges liées au parc automobile.</p>
+    </div>
+
+    <p-button
+      label="Nouvelle dépense"
+      icon="pi pi-plus"
+      (onClick)="openCreateDialog()"
+    ></p-button>
+  </div>
+
+  <div class="erp-card">
+    <div class="table-toolbar" [formGroup]="searchForm">
+      <div>
+        <h2>Liste des dépenses</h2>
+        <span>{{ totalRecords }} élément(s)</span>
+      </div>
+
+      <input
+        pInputText
+        type="search"
+        formControlName="search"
+        placeholder="Rechercher véhicule, locataire, type..."
+      />
+    </div>
+
+    <p-table
+      [value]="depenses"
+      dataKey="idDepense"
+      [lazy]="true"
+      [paginator]="true"
+      [rows]="rows"
+      [first]="first"
+      [totalRecords]="totalRecords"
+      [rowsPerPageOptions]="rowsPerPageOptions"
+      [loading]="loading"
+      [rowHover]="true"
+      [sortField]="'dateDepense'"
+      [sortOrder]="-1"
+      (onLazyLoad)="loadDepenses($event)"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th pSortableColumn="dateDepense">
+            Date
+            <p-sortIcon field="dateDepense"></p-sortIcon>
+          </th>
+
+          <th pSortableColumn="idVehicule">
+            Véhicule
+            <p-sortIcon field="idVehicule"></p-sortIcon>
+          </th>
+<!--
+          <th pSortableColumn="idLocataire">
+            Locataire
+            <p-sortIcon field="idLocataire"></p-sortIcon>
+          </th> -->
+
+          <th pSortableColumn="typeDepense">
+            Type
+            <p-sortIcon field="typeDepense"></p-sortIcon>
+          </th>
+
+          <th pSortableColumn="montantXaf" class="text-right">
+            Montant
+            <p-sortIcon field="montantXaf"></p-sortIcon>
+          </th>
+
+          <th class="text-right">Km</th>
+          <th>Justificatif</th>
+          <th class="actions-col">Actions</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-depense>
+        <tr>
+          <td>{{ depense.dateDepense | date: 'dd/MM/yyyy' }}</td>
+
+          <td>
+            <strong>{{ depense.vehicule?.marque || '—' }} - {{ depense.vehicule?.modele || '—' }}</strong>
+          </td>
+<!--
+          <td>{{ depense.idLocataire || '—' }}</td> -->
+
+          <td>
+            <p-tag
+              [value]="getTypeLabel(depense.typeDepense)"
+              [severity]="getTypeSeverity(depense.typeDepense)"
+            ></p-tag>
+          </td>
+
+          <td class="text-right">
+            <strong>{{ formatXaf(depense.montantXaf) }}</strong>
+          </td>
+
+          <td class="text-right">
+            {{ depense.kilometrageAuMoment ?? '—' }}
+          </td>
+
+          <td>
+            @if (depense.urlJustificatif) {
+              <a
+                [href]="depense.urlJustificatif"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="link"
+              >
+                Voir
+              </a>
+            } @else {
+              <span class="muted">Aucun</span>
+            }
+          </td>
+
+          <td>
+            <div class="actions">
+              <p-button
+                icon="pi pi-eye"
+                severity="info"
+                [text]="true"
+                [rounded]="true"
+                pTooltip="Voir"
+                tooltipPosition="top"
+                (onClick)="openDetailDialog(depense)"
+              ></p-button>
+
+              <p-button
+                icon="pi pi-pencil"
+                severity="secondary"
+                [text]="true"
+                [rounded]="true"
+                pTooltip="Modifier"
+                tooltipPosition="top"
+                (onClick)="openEditDialog(depense)"
+              ></p-button>
+
+              <p-button
+                icon="pi pi-trash"
+                severity="danger"
+                [text]="true"
+                [rounded]="true"
+                pTooltip="Supprimer"
+                tooltipPosition="top"
+                (onClick)="confirmDelete(depense)"
+              ></p-button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="8">
+            <div class="empty-state">
+              <i class="pi pi-inbox"></i>
+              <p>Aucune dépense véhicule trouvée.</p>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</section>
+
+<p-dialog
+  [(visible)]="dialogVisible"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [header]="dialogTitle"
+  [style]="{ width: '760px' }"
+  [breakpoints]="{ '960px': '90vw', '640px': '96vw' }"
+>
+  <form id="depenseVehiculeForm" class="erp-form" [formGroup]="form">
+    <div class="form-grid">
+
+      <div class="field">
+        <label for="idVehicule">Véhicule <span>*</span></label>
+        <p-select
+          inputId="idVehicule"
+          formControlName="idVehicule"
+          [options]="vehicules()"
+          optionLabel="marque"
+          optionValue="idVehicule"
+          placeholder="Sélectionner"
+          appendTo="body"
+          [class.ng-invalid]="isInvalid('idVehicule')"
+        ></p-select>
+        @if (isInvalid('idVehicule')) {
+          <small>Le véhicule est obligatoire.</small>
+        }
+      </div>
+
+      <div class="field">
+        <label for="typeDepense">Type de dépense <span>*</span></label>
+        <p-select
+          inputId="typeDepense"
+          formControlName="typeDepense"
+          [options]="typeDepenseOptions"
+          optionLabel="label"
+          optionValue="code"
+          placeholder="Sélectionner"
+          appendTo="body"
+          [class.ng-invalid]="isInvalid('typeDepense')"
+        ></p-select>
+        @if (isInvalid('typeDepense')) {
+          <small>Le type de dépense est obligatoire.</small>
+        }
+      </div>
+
+      <div class="field">
+        <label for="montantXaf">Montant XAF <span>*</span></label>
+        <p-inputNumber
+          inputId="montantXaf"
+          formControlName="montantXaf"
+          mode="currency"
+          currency="XAF"
+          locale="fr-CM"
+          [min]="1"
+          [minFractionDigits]="0"
+          [maxFractionDigits]="0"
+          [class.ng-invalid]="isInvalid('montantXaf')"
+        ></p-inputNumber>
+        @if (isInvalid('montantXaf')) {
+          <small>Le montant doit être supérieur à 0.</small>
+        }
+      </div>
+
+      <div class="field">
+        <label for="dateDepense">Date dépense <span>*</span></label>
+        <p-datepicker
+          inputId="dateDepense"
+          formControlName="dateDepense"
+          dateFormat="dd/mm/yy"
+          [showIcon]="true"
+          appendTo="body"
+          [class.ng-invalid]="isInvalid('dateDepense')"
+        ></p-datepicker>
+        @if (isInvalid('dateDepense')) {
+          <small>La date est obligatoire.</small>
+        }
+      </div>
+
+      <div class="field">
+        <label for="kilometrageAuMoment">Kilométrage</label>
+        <p-inputNumber
+          inputId="kilometrageAuMoment"
+          formControlName="kilometrageAuMoment"
+          [min]="0"
+          suffix=" km"
+          [useGrouping]="true"
+        ></p-inputNumber>
+      </div>
+
+      <div class="field">
+        <label for="idIntervention">Intervention liée</label>
+        <!-- <input
+          id="idIntervention"
+          pInputText
+          formControlName="idIntervention"
+          placeholder="ID intervention, optionnel"
+        /> -->
+        <p-select
+          inputId="idIntervention"
+          formControlName="idIntervention"
+          [options]="interventionList"
+          optionLabel="titre"
+          optionValue="idIntervention"
+          placeholder="Sélectionner"
+          appendTo="body"
+          [class.ng-invalid]="isInvalid('idIntervention')"
+        ></p-select>
+      </div>
+
+      <div class="field field-full">
+        <label for="description">Description</label>
+        <textarea
+          id="description"
+          pTextarea
+          formControlName="description"
+          rows="3"
+          placeholder="Note interne, motif, référence facture..."
+        ></textarea>
+      </div>
+
+      <div class="field field-full">
+        <label>Justificatif</label>
+
+        <p-fileupload
+          mode="basic"
+          chooseLabel="Choisir un fichier"
+          chooseIcon="pi pi-upload"
+          accept=".pdf,image/*"
+          [maxFileSize]="5242880"
+          [multiple]="false"
+          [auto]="false"
+          [customUpload]="true"
+          (onSelect)="onFileSelect($event)"
+          (onClear)="onFileClear()"
+        ></p-fileupload>
+
+        @if (selectedFileName) {
+          <small class="file-name">
+            Fichier sélectionné : {{ selectedFileName }}
+          </small>
+        }
+
+        @if (form.controls.urlJustificatif.value && !selectedFileName) {
+          <small class="file-name">
+            Justificatif actuel conservé si aucun nouveau fichier n’est choisi.
+          </small>
+        }
+      </div>
+    </div>
+  </form>
+
+  <ng-template pTemplate="footer">
+    <p-button
+      label="Annuler"
+      severity="secondary"
+      [text]="true"
+      (onClick)="dialogVisible = false"
+    ></p-button>
+
+    <p-button
+      label="Enregistrer"
+      icon="pi pi-check"
+      type="submit"
+      form="depenseVehiculeForm"
+      [loading]="saving"
+      (onClick)="save()"
+    ></p-button>
+  </ng-template>
+</p-dialog>
+
+<p-dialog
+  [(visible)]="detailDialogVisible"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  header="Détail de la dépense"
+  [style]="{ width: '560px' }"
+  [breakpoints]="{ '960px': '80vw', '640px': '95vw' }"
+>
+  @if (selectedDepense) {
+    <div class="detail-grid">
+      <div>
+        <span>Date</span>
+        <strong>{{ selectedDepense.dateDepense | date: 'dd/MM/yyyy' }}</strong>
+      </div>
+
+      <div>
+        <span>Montant</span>
+        <strong>{{ formatXaf(selectedDepense.montantXaf) }}</strong>
+      </div>
+
+      <div>
+        <span>Véhicule</span>
+        <strong>{{ selectedDepense.idVehicule || '—' }}</strong>
+      </div>
+<!--
+      <div>
+        <span>Locataire</span>
+        <strong>{{ selectedDepense.idLocataire || '—' }}</strong>
+      </div> -->
+
+      <div>
+        <span>Type</span>
+        <strong>{{ getTypeLabel(selectedDepense.typeDepense) }}</strong>
+      </div>
+
+      <div>
+        <span>Kilométrage</span>
+        <strong>{{ selectedDepense.kilometrageAuMoment ?? '—' }}</strong>
+      </div>
+
+      <div class="detail-full">
+        <span>Description</span>
+        <p>{{ selectedDepense.description || '—' }}</p>
+      </div>
+
+      <div class="detail-full">
+        <span>Justificatif</span>
+
+        @if (selectedDepense.urlJustificatif) {
+          <a
+            [href]="selectedDepense.urlJustificatif"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="link"
+          >
+            Ouvrir le justificatif
+          </a>
+        } @else {
+          <p>—</p>
+        }
+      </div>
+    </div>
+  }
+</p-dialog>

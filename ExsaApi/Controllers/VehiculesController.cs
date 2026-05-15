@@ -2,7 +2,9 @@
 using Domain.Models;
 using Domain.Models.Vues;
 using Domain.Services;
+using Infrastructure.Data.Entities;
 using Microsoft.AspNetCore.Mvc;
+using System.Drawing;
 
 namespace ExsaApi.Controllers;
 
@@ -16,6 +18,9 @@ public class VehiculesController : ControllerBase
     private readonly IVehiculeDashboardService _dashboardService;
     private readonly IDepenseParVehiculeService _depenseParVehiculeService;
     private readonly IAlerteVehiculeService _alerteVehiculeService;
+    private readonly IInterventionService _interventionService;
+    private readonly IAppService<Utilisateur> _utilisateurService;
+    private readonly IGenericService<Locataire> _locataireService;
 
     public VehiculesController(
         IVehiculeService vehiculeService,
@@ -23,7 +28,10 @@ public class VehiculesController : ControllerBase
         IEntretienVehiculeService entretienService,
         IVehiculeDashboardService dashboardService,
         IDepenseParVehiculeService depenseParVehiculeService,
-        IAlerteVehiculeService alerteVehiculeService)
+        IAlerteVehiculeService alerteVehiculeService,
+        IInterventionService interventionService,
+        IGenericService<Locataire> locataireService,
+         IAppService<Utilisateur> utilisateurService)
     {
         _vehiculeService = vehiculeService;
         _depenseService = depenseService;
@@ -31,6 +39,9 @@ public class VehiculesController : ControllerBase
         _dashboardService = dashboardService;
         _depenseParVehiculeService = depenseParVehiculeService;
         _alerteVehiculeService = alerteVehiculeService;
+        _interventionService = interventionService;
+        _locataireService = locataireService;
+        _utilisateurService = utilisateurService;
     }
 
     #region VEHICULES
@@ -65,8 +76,43 @@ public class VehiculesController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Vehicule>> CreateVehicule([FromBody] Vehicule vehicule)
+    public async Task<ActionResult<Vehicule>> CreateVehicule([FromForm] Vehicule vehicule)
     {
+
+        var locataire = (await _locataireService.GetAllAsync()).FirstOrDefault();
+        if (locataire == null)
+        {
+            throw new Exception("Locataire non définit");
+        }
+
+        var firstUtilisateur = (await _utilisateurService.GetAllAsync()).First();
+        vehicule.IdCreateur = firstUtilisateur.IdUtilisateur;
+
+
+        if (vehicule.FichierPhoto != null && vehicule.FichierPhoto.Length > 0)
+        {
+            var extension = Path.GetExtension(vehicule.FichierPhoto.FileName).ToLower();
+
+            var folderPath = Path.Combine("wwwroot/uploads", "Vehicules");
+
+            if (!Directory.Exists(folderPath))
+                Directory.CreateDirectory(folderPath);
+
+            var fileName = $"{Guid.NewGuid()}{extension}";
+            var fullPath = Path.Combine(folderPath, fileName);
+
+            // Sauvegarde physique
+            using (var stream = new FileStream(fullPath, FileMode.Create))
+            {
+                await vehicule.FichierPhoto.CopyToAsync(stream);
+            }
+
+            var url = $"{Request.Scheme}://{Request.Host}/uploads/Vehicules/{fileName}";
+            vehicule.UrlPhoto = url;
+        }
+
+
+        vehicule.IdLocataire = locataire.IdLocataire;
         var created = await _vehiculeService.CreateAsync(vehicule);
 
         return CreatedAtAction(
@@ -76,11 +122,33 @@ public class VehiculesController : ControllerBase
     }
 
     [HttpPut("{id:guid}")]
-    public async Task<ActionResult<Vehicule>> UpdateVehicule(Guid id, [FromBody] Vehicule vehicule)
+    public async Task<ActionResult<Vehicule>> UpdateVehicule(Guid id, [FromForm] Vehicule vehicule)
     {
         if (id != vehicule.IdVehicule)
         {
             return BadRequest("L'identifiant ne correspond pas.");
+        }
+
+        if (vehicule.FichierPhoto != null && vehicule.FichierPhoto.Length > 0)
+        {
+            var extension = Path.GetExtension(vehicule.FichierPhoto.FileName).ToLower();
+
+            var folderPath = Path.Combine("wwwroot/uploads", "Vehicules");
+
+            if (!Directory.Exists(folderPath))
+                Directory.CreateDirectory(folderPath);
+
+            var fileName = $"{Guid.NewGuid()}{extension}";
+            var fullPath = Path.Combine(folderPath, fileName);
+
+            // Sauvegarde physique
+            using (var stream = new FileStream(fullPath, FileMode.Create))
+            {
+                await vehicule.FichierPhoto.CopyToAsync(stream);
+            }
+
+            var url = $"{Request.Scheme}://{Request.Host}/uploads/Vehicules/{fileName}";
+            vehicule.UrlPhoto = url;
         }
 
         var updated = await _vehiculeService.UpdateAsync(vehicule);
@@ -99,6 +167,20 @@ public class VehiculesController : ControllerBase
     #endregion
 
     #region DEPENSES
+
+    [HttpGet("depenses")]
+    public async Task<ActionResult<IEnumerable<DepenseVehicule>>> GetDepensesVehicule()
+    {
+        var depenses = await _depenseService.GetAllAsync();
+
+        return Ok(new
+        {
+            Content = depenses,
+            totalElements = depenses.Count(),
+            page = 1,
+            size = 10
+        });
+    }
 
     [HttpGet("{idVehicule:guid}/depenses")]
     public async Task<ActionResult<IEnumerable<DepenseVehicule>>> GetDepensesByVehicule(Guid idVehicule)
@@ -121,12 +203,43 @@ public class VehiculesController : ControllerBase
         return Ok(depense);
     }
 
-    [HttpPost("{idVehicule:guid}/depenses")]
+    [HttpPost("createDepenses")]
     public async Task<ActionResult<DepenseVehicule>> CreateDepense(
-        Guid idVehicule,
-        [FromBody] DepenseVehicule depense)
+        [FromForm] DepenseVehicule depense)
     {
-        depense.IdVehicule = idVehicule;
+        //depense.IdVehicule = idVehicule;
+
+        if (depense.FichierJustificatif != null && depense.FichierJustificatif.Length > 0)
+        {
+            var extension = Path.GetExtension(depense.FichierJustificatif.FileName).ToLower();
+
+            var folderPath = Path.Combine("wwwroot/uploads", "DepenseVehicules");
+
+            if (!Directory.Exists(folderPath))
+                Directory.CreateDirectory(folderPath);
+
+            var fileName = $"{Guid.NewGuid()}{extension}";
+            var fullPath = Path.Combine(folderPath, fileName);
+
+            // Sauvegarde physique
+            using (var stream = new FileStream(fullPath, FileMode.Create))
+            {
+                await depense.FichierJustificatif.CopyToAsync(stream);
+            }
+
+            var url = $"{Request.Scheme}://{Request.Host}/uploads/DepenseVehicules/{fileName}";
+            depense.UrlJustificatif = url;
+        }
+
+        var locataire = (await _locataireService.GetAllAsync()).FirstOrDefault();
+        if (locataire == null)
+        {
+            throw new Exception("Locataire non définit");
+        }
+
+        var firstUtilisateur = (await _utilisateurService.GetAllAsync()).First();
+        depense.IdSaisiePar = firstUtilisateur.IdUtilisateur;
+        depense.IdLocataire = locataire.IdLocataire;
 
         var created = await _depenseService.CreateAsync(depense);
 
@@ -139,11 +252,33 @@ public class VehiculesController : ControllerBase
     [HttpPut("depenses/{id:guid}")]
     public async Task<ActionResult<DepenseVehicule>> UpdateDepense(
         Guid id,
-        [FromBody] DepenseVehicule depense)
+        [FromForm] DepenseVehicule depense)
     {
         if (id != depense.IdDepense)
         {
             return BadRequest("L'identifiant ne correspond pas.");
+        }
+
+        if (depense.FichierJustificatif != null && depense.FichierJustificatif.Length > 0)
+        {
+            var extension = Path.GetExtension(depense.FichierJustificatif.FileName).ToLower();
+
+            var folderPath = Path.Combine("wwwroot/uploads", "DepenseVehicules");
+
+            if (!Directory.Exists(folderPath))
+                Directory.CreateDirectory(folderPath);
+
+            var fileName = $"{Guid.NewGuid()}{extension}";
+            var fullPath = Path.Combine(folderPath, fileName);
+
+            // Sauvegarde physique
+            using (var stream = new FileStream(fullPath, FileMode.Create))
+            {
+                await depense.FichierJustificatif.CopyToAsync(stream);
+            }
+
+            var url = $"{Request.Scheme}://{Request.Host}/uploads/DepenseVehicules/{fileName}";
+            depense.UrlJustificatif = url;
         }
 
         var updated = await _depenseService.UpdateAsync(depense);

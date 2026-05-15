@@ -80,6 +80,8 @@ public class VehiculeStore : IVehiculeStore
         entity.DATE_MODIFICATION = DateTime.UtcNow;
         entity.EST_SUPPRIME = vehicule.EstSupprime;
 
+        _context.VEHICULEs.Update(entity);
+
         await _context.SaveChangesAsync();
 
         return entity.ToModel();

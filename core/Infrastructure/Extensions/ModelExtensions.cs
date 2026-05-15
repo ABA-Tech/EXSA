@@ -439,7 +439,9 @@ namespace Infrastructure.Extensions
                 KilometrageAuMoment = entity.KILOMETRAGE_AU_MOMENT,
                 UrlJustificatif = entity.URL_JUSTIFICATIF,
                 DateCreation = entity.DATE_CREATION,
-                DateModification = entity.DATE_MODIFICATION
+                DateModification = entity.DATE_MODIFICATION,
+                Vehicule = entity.ID_VEHICULENavigation?.ToModel(),
+                Intervention = entity.ID_INTERVENTIONNavigation?.ToModel(),
             };
         }
 

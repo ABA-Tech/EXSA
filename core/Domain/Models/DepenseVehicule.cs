@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 
 namespace Domain.Models;
 
@@ -29,4 +30,9 @@ public class DepenseVehicule
     public DateTime DateCreation { get; set; }
 
     public DateTime? DateModification { get; set; }
+
+    public IFormFile? FichierJustificatif { get; set; }
+
+    public virtual Vehicule? Vehicule { get; set; }
+    public virtual Intervention? Intervention { get; set; }
 }

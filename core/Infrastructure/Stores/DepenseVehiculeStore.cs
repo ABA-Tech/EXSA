@@ -19,6 +19,8 @@ public class DepenseVehiculeStore : IDepenseVehiculeStore
     public async Task<DepenseVehicule?> GetByIdAsync(Guid id)
     {
         var entity = await _context.DEPENSE_VEHICULEs
+            .Include(x => x.ID_VEHICULENavigation)
+            .Include(x => x.ID_INTERVENTIONNavigation)
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.ID_DEPENSE == id);
 
@@ -28,6 +30,8 @@ public class DepenseVehiculeStore : IDepenseVehiculeStore
     public async Task<IEnumerable<DepenseVehicule>> GetAllAsync()
     {
         var entities = await _context.DEPENSE_VEHICULEs
+            .Include(x=>x.ID_VEHICULENavigation)
+            .Include(x=>x.ID_INTERVENTIONNavigation)
             .AsNoTracking()
             .ToListAsync();
 
@@ -67,6 +71,7 @@ public class DepenseVehiculeStore : IDepenseVehiculeStore
         entity.URL_JUSTIFICATIF = depense.UrlJustificatif;
         entity.DATE_MODIFICATION = DateTime.UtcNow;
 
+        _context.Update(entity);
         await _context.SaveChangesAsync();
 
         return entity.ToModel();

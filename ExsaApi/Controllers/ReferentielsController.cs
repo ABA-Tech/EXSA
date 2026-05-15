@@ -68,5 +68,24 @@ namespace ExsaApi.Controllers
         {
             return Ok(await _referentielService.GetAllTypeDepenseInterventionAsync());
         }
+
+
+        [HttpGet("GetTypeDepenseVehiculeAsync")]
+        public async Task<IActionResult> GetAllTypeDepenseVehiculeAsync()
+        {
+            return Ok(await _referentielService.GetAllTypeDepenseVehiculeAsync());
+        }
+
+        [HttpGet("GetStatusVehiculeAsync")]
+        public async Task<IActionResult> GetAllStatusVehiculeAsync()
+        {
+            return Ok(await _referentielService.GetAllStatusVehiculeAsync());
+        }
+
+        [HttpGet("GetTypeVehiculesAsync")]
+        public async Task<IActionResult> GetAllTypeVehiculesAsync()
+        {
+            return Ok(await _referentielService.GetAllTypeVehiculesAsync());
+        }
     }
 }
