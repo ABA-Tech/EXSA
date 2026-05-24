@@ -1,0 +1,66 @@
+<p-toast></p-toast>
+
+<div class="login-page">
+  <p-card styleClass="login-card">
+    <ng-template pTemplate="header">
+      <div class="login-header">
+        <h1>Connexion ERP</h1>
+        <p>Accédez à votre espace de gestion</p>
+      </div>
+    </ng-template>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" class="login-form">
+      <div class="field">
+        <label for="identifiant">Email ou téléphone</label>
+
+        <input
+          id="identifiant"
+          type="text"
+          pInputText
+          formControlName="identifiant"
+          autocomplete="username"
+          class="w-full"
+          [class.ng-invalid]="isInvalid('identifiant')"
+          [class.ng-dirty]="isInvalid('identifiant')"
+        />
+
+        @if (isInvalid('identifiant')) {
+          <small class="p-error">
+            L'email ou le téléphone est obligatoire.
+          </small>
+        }
+      </div>
+
+      <div class="field">
+        <label for="motDePasse">Mot de passe</label>
+
+        <p-password
+          inputId="motDePasse"
+          formControlName="motDePasse"
+          [feedback]="false"
+          [toggleMask]="true"
+          autocomplete="current-password"
+          styleClass="w-full"
+          inputStyleClass="w-full"
+          [class.ng-invalid]="isInvalid('motDePasse')"
+          [class.ng-dirty]="isInvalid('motDePasse')"
+        ></p-password>
+
+        @if (isInvalid('motDePasse')) {
+          <small class="p-error">
+            Le mot de passe est obligatoire.
+          </small>
+        }
+      </div>
+
+      <p-button
+        type="submit"
+        label="Se connecter"
+        icon="pi pi-lock"
+        styleClass="w-full"
+        [loading]="loading"
+        [disabled]="loading"
+      ></p-button>
+    </form>
+  </p-card>
+</div>

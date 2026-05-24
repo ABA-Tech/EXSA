@@ -3,12 +3,14 @@ using Domain.Models;
 using Domain.Models.Vues;
 using Domain.Services;
 using Infrastructure.Data.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Drawing;
 
 namespace ExsaApi.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/vehicules")]
 public class VehiculesController : ControllerBase
 {

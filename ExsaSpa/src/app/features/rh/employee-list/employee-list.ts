@@ -139,7 +139,8 @@ export class EmployeeList {
             idLocataire: employe.idLocataire,
             idUtilisateur: employe.idUtilisateur,
             idEmploye: employe.idEmploye,
-            role: employe.utilisateur?.role
+            role: employe.utilisateur?.role,
+            motDePasseHash: employe.utilisateur?.motDePasseHash ?? this.generatePassword(10)
          };
         this.employeDialog = true;
     }
@@ -168,6 +169,8 @@ export class EmployeeList {
         }
 
         if (this.createEmpDto.idEmploye) {
+            console.log(this.createEmpDto);
+
             this.employeService.UpdateEmployee(this.createEmpDto).subscribe({
                 next: (res) => {
                     this.loadEmployeData();
@@ -199,6 +202,7 @@ export class EmployeeList {
         this.employe = {};
         this.submitted = false;
         this.employeDialog = true;
+        this.createEmpDto.motDePasseHash = this.generatePassword(10)
     }
 
     getSeverity(status: boolean) {
@@ -250,4 +254,11 @@ export class EmployeeList {
         return id;
     }
 
+    generatePassword(length: number = 16): string {
+      const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
+
+      return Array.from({ length }, () =>
+        chars[Math.floor(Math.random() * chars.length)]
+      ).join("");
+    }
 }

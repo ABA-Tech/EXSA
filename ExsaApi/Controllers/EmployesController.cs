@@ -1,26 +1,33 @@
-﻿using Domain.Models;
+﻿using Domain.Common;
+using Domain.Models;
 using Domain.Models.Dto;
 using Domain.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ExsaApi.Controllers
 {
     [Route("api/[controller]")]
+
+    [AllowAnonymous]
     [ApiController]
     public class EmployesController : ControllerBase
     {
         private readonly IGenericService<Employe> _employeService;
         private readonly IAppService<Utilisateur> _utilisateurService;
         private readonly IGenericService<Locataire> _locataireService;
+        private readonly IPasswordService _passwordService;
 
         public EmployesController(IGenericService<Employe> genericService, 
                                 IAppService<Utilisateur> utilisateurService,
-                                IGenericService<Locataire> locataireService)
+                                IGenericService<Locataire> locataireService,
+                                IPasswordService passwordService)
         {
             _employeService = genericService;
             _utilisateurService = utilisateurService;
             _locataireService = locataireService;
+            _passwordService = passwordService;
         }
 
         [HttpGet]
@@ -54,9 +61,10 @@ namespace ExsaApi.Controllers
                 NomComplet = employe.NomComplet,
                 Telephone = employe.Telephone,
                 IdLocataire = locataire.IdLocataire,
-                MotDePasseHash = "",
+                MotDePasseHash = employe.MotDePasseHash,
                 Role = employe.Role
             };
+            utilisateur.MotDePasseHash = _passwordService.HashPassword(utilisateur, utilisateur.MotDePasseHash);
 
             var result = await _utilisateurService.CreateAsync(utilisateur);
 
@@ -96,6 +104,8 @@ namespace ExsaApi.Controllers
             utilisateur.Telephone = employe.Telephone;
             utilisateur.NomComplet = employe.NomComplet;
             utilisateur.Role = employe.Role;
+            utilisateur.MotDePasseHash = employe.MotDePasseHash;
+            utilisateur.MotDePasseHash = _passwordService.HashPassword(utilisateur, utilisateur.MotDePasseHash);
 
             await _utilisateurService.UpdateAsync(utilisateur);
 

@@ -1,5 +1,5 @@
-import { provideHttpClient, withFetch } from '@angular/common/http';
-import { ApplicationConfig, importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
+import { provideHttpClient, withFetch, withInterceptors, withXsrfConfiguration } from '@angular/common/http';
+import { ApplicationConfig, importProvidersFrom, provideZoneChangeDetection, provideZonelessChangeDetection } from '@angular/core';
 import { provideRouter, withEnabledBlockingInitialNavigation, withInMemoryScrolling } from '@angular/router';
 import Aura from '@primeuix/themes/aura';
 import { providePrimeNG } from 'primeng/config';
@@ -17,6 +17,8 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { SelectModule } from 'primeng/select';
 import { DatePickerModule } from 'primeng/datepicker';
 import { MessageService, ConfirmationService } from 'primeng/api';
+import { authErrorInterceptor } from './app/core/interceptors/auth-error.interceptor';
+import { credentialsInterceptor } from './app/core/interceptors/credentials.interceptor';
 
 
 export const appConfig: ApplicationConfig = {
@@ -29,7 +31,19 @@ export const appConfig: ApplicationConfig = {
         MessageService,
         ConfirmationService,
         importProvidersFrom(
- 
+
+        ),
+
+
+        provideHttpClient(
+          withXsrfConfiguration({
+            cookieName: 'XSRF-TOKEN',
+            headerName: 'X-XSRF-TOKEN'
+          }),
+          withInterceptors([
+            credentialsInterceptor,
+            authErrorInterceptor
+          ])
         )
     ]
 };

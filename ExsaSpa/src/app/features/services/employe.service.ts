@@ -27,7 +27,7 @@ export class Utilisateur {
     dateModification?: string;
     idLocataire?: string;
     email?: string;
-    passwordHash?: string;
+    motDePasseHash?: string;
     telephone?: string;
     role?: string;
 }
@@ -47,7 +47,7 @@ export interface CreateEmployeeDto {
     dateModification?: string;
     nomComplet?: string;
     email?: string;
-    passwordHash?: string;
+    motDePasseHash?: string;
     telephone?: string;
     role?: string;
 }
@@ -71,7 +71,7 @@ export class EmployeService extends ApiService<Employee> {
 
 @Injectable()
 export class ReferentielService {
-    
+
     protected httpClient =  inject(HttpClient);
     readonly baseUrl = 'https://localhost:7118/api/Referentiels';
 
