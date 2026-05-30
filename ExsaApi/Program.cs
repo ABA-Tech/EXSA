@@ -6,12 +6,16 @@ using Domain.Services;
 using Domain.Stores;
 using Infrastructure.Data.Entities;
 using Infrastructure.Repositories;
+using Infrastructure.Services;
 using Infrastructure.Stores;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using System.Data;
 using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -39,7 +43,7 @@ builder.Services.AddScoped<IRepository<Intervention>, InterventionStore>();
 builder.Services.AddScoped<IRepository<Utilisateur>, UtilisateurStore>();
 builder.Services.AddScoped<ILocataireStore, LocataireStore>();
 builder.Services.AddScoped<IEmployeStore, EmployeStore>();
-builder.Services.AddScoped<IInterventionStore, InterventionStore>();
+builder.Services.AddTransient<IInterventionStore, InterventionStore>();
 builder.Services.AddScoped<IReferentielStore, ReferentielStore>();
 builder.Services.AddScoped<IArticleStockStore, ArticleStockStore>();
 builder.Services.AddScoped<IMouvementStockStore, MouvementStockStore>();
@@ -67,6 +71,11 @@ builder.Services.AddScoped<IPasswordService, PasswordService>();
 
 builder.Services.AddScoped<IDashboardStore, DashboardStore>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
+
+builder.Services.AddTransient<IDbConnection>(sp =>
+    new SqlConnection(builder.Configuration.GetConnectionString("Default")));
+builder.Services.AddTransient<IDapperService, DapperService>();
+builder.Services.AddScoped<ExsaApi.Services.DashbaordService>();
 
 
 builder.Services.AddControllers();

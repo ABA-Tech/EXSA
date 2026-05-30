@@ -72,6 +72,8 @@ public partial class ExsaDbContext : DbContext
 
     public virtual DbSet<REF_TYPE_VEHICULE> REF_TYPE_VEHICULEs { get; set; }
 
+    public virtual DbSet<REGLEMENT> REGLEMENTs { get; set; }
+
     public virtual DbSet<UTILISATEUR> UTILISATEURs { get; set; }
 
     public virtual DbSet<VEHICULE> VEHICULEs { get; set; }
@@ -714,6 +716,33 @@ public partial class ExsaDbContext : DbContext
 
             entity.Property(e => e.CODE).HasMaxLength(30);
             entity.Property(e => e.LIBELLE).HasMaxLength(100);
+        });
+
+        modelBuilder.Entity<REGLEMENT>(entity =>
+        {
+            entity.HasKey(e => e.ID_REGLEMENT).HasName("PK__REGLEMEN__4F88058CF86CF515");
+
+            entity.ToTable("REGLEMENT");
+
+            entity.Property(e => e.ID_REGLEMENT).ValueGeneratedNever();
+            entity.Property(e => e.DATE_CREATION)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.DATE_MODIFICATION)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.DATE_REGLEMENT).HasColumnType("datetime");
+            entity.Property(e => e.MODE_REGLEMENT)
+                .HasMaxLength(30)
+                .IsUnicode(false);
+            entity.Property(e => e.MONTANT_XAF).HasColumnType("decimal(15, 2)");
+            entity.Property(e => e.REFERENCE_REGLEMENT)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+
+            entity.HasOne(d => d.ID_FACTURENavigation).WithMany(p => p.REGLEMENTs)
+                .HasForeignKey(d => d.ID_FACTURE)
+                .HasConstraintName("FK_REGLEMENT_FACTURE");
         });
 
         modelBuilder.Entity<UTILISATEUR>(entity =>

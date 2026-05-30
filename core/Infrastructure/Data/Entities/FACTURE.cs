@@ -39,5 +39,7 @@ public partial class FACTURE
 
     public virtual ICollection<LIGNE_FACTURE> LIGNE_FACTUREs { get; set; } = new List<LIGNE_FACTURE>();
 
+    public virtual ICollection<REGLEMENT> REGLEMENTs { get; set; } = new List<REGLEMENT>();
+
     public virtual REF_STATUT_FACTURE STATUTNavigation { get; set; } = null!;
 }

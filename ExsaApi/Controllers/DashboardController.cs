@@ -1,6 +1,7 @@
 ﻿using System.Security.Claims;
 using Domain.Models.Dto;
 using Domain.Services;
+using ExsaApi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,11 +13,20 @@ namespace ExsaApi.Controllers;
 public sealed class DashboardController : ControllerBase
 {
     private readonly IDashboardService _dashboardService;
+    private readonly DashbaordService _localService;
 
-    public DashboardController(IDashboardService dashboardService)
+    public DashboardController(IDashboardService dashboardService, DashbaordService service)
     {
         _dashboardService = dashboardService
             ?? throw new ApplicationException(nameof(dashboardService));
+        _localService = service;
+    }
+
+    [HttpGet("temp")]
+    public ActionResult GetDashbordTmp()
+    {
+        var result = _localService.GetDashbord();
+        return Ok(result);
     }
 
     [HttpGet("global")]

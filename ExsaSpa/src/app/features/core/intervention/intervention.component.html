@@ -467,6 +467,112 @@
                     </ng-template>
                 </p-step-panel>
 
+                <p-step-panel [value]="6">
+                    <ng-template #content let-activateCallback="activateCallback">
+                        <div class="validation-wrapper">
+                            <!-- Role label -->
+                            <p-tag value="Superviseur" styleClass="role-tag" />
+
+                            <!-- Title -->
+                            <h2 class="section-title">Validation de l'intervention</h2>
+
+                            <!-- Description row -->
+                            <p class="validation-desc">
+                                Le superviseur remplit
+                                <span class="field-pill">ID_VALIDATEUR</span>
+                                +
+                                <span class="field-pill">DATE_VALIDATION</span>
+                                et passe
+                                <span class="field-pill">STATUT</span>
+                                → <strong>VALIDE</strong>
+                            </p>
+
+                            <!-- Intervention card -->
+                            <div class="int-card">
+                                <div class="int-card-header">
+                                    <span class="int-id">{{ intervention.reference }}</span>
+                                    <span class="int-status validated">Validée</span>
+                                </div>
+
+                                <div class="int-card-body">
+                                    <div class="int-info-row">
+                                        <div class="int-col title-col">
+                                            <span class="info-label">TITRE</span>
+                                            <span class="info-value">{{ intervention.titre }}</span>
+                                        </div>
+                                        <div class="int-col type-col">
+                                            <span class="info-label">TYPE <span class="field-pill small"></span></span>
+                                            <span class="info-value">{{ intervention.type }}</span>
+                                        </div>
+                                        <div class="int-col priority-col">
+                                            <span class="info-label">PRIORITE</span>
+                                            <span class="priority-badge high">{{ intervention.priorite }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="int-card-footer">
+                                    <div class="stat-item">
+                                        <span class="stat-value">{{ dateDiff(intervention.dateDebut, intervention.dateFin) }}</span>
+                                        <span class="stat-label">DATE_DEBUT → DATE_FIN</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-value">{{ affectationList().length }}</span>
+                                        <span class="stat-label">Affectations</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-value">{{ photoInterventionList().length }}</span>
+                                        <span class="stat-label">Images disponibles</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="photo-section">
+                            <div class="photo-section-header">
+                                <div>
+                                <p-tag value="Photos" styleClass="photo-tag"></p-tag>
+                                <h3>PHOTO_INTERVENTIONS</h3>
+                                </div>
+                                <span class="photo-count">{{ photoInterventionList().length }} images</span>
+                            </div>
+
+                            <div class="photo-layout">
+                                <div class="thumb-strip">
+                                <button
+                                    type="button"
+                                    class="thumb-card"
+                                    *ngFor="let photo of photoInterventionList(); let i = index"
+                                    [class.active]="selectedPhotoIndex === i"
+                                    (click)="selectedPhotoIndex = i"
+                                >
+                                    <img [src]="photo.urlBlob" [alt]="'Photo ' + (i + 1)" />
+                                    <span class="thumb-label">Photo {{ i + 1 }}</span>
+                                </button>
+                                </div>
+
+                                <div class="photo-preview" *ngIf="photoInterventionList()?.length">
+                                <div class="preview-frame">
+                                    <img
+                                    [src]="photoInterventionList()[selectedPhotoIndex || 0]?.urlBlob"
+                                    alt="Aperçu photo"
+                                    />
+                                </div>
+
+                                <div class="preview-meta">
+                                    <span class="preview-title">Aperçu</span>
+                                    <span class="preview-hint">Clique sur une miniature pour changer l’image</span>
+                                </div>
+                                </div>
+                            </div>
+                            </div>
+
+                        </div>
+                        <div class="flex pt-6 justify-between">
+                            <!-- <p-button label="Précédent" severity="secondary" icon="pi pi-arrow-left" (onClick)="etapeDemarrage(-1, 'VALIDEE')" /> -->
+                            <p-button label="Valider la clôture" icon="pi pi-arrow-right" iconPos="right" (onClick)="etapeDemarrage(1, 'CLOTUREE')" />
+                        </div>
+                    </ng-template>
+                </p-step-panel>
             </p-step-panels>
         </p-stepper>
     </div>

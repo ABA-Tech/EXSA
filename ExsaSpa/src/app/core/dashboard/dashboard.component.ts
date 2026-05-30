@@ -10,6 +10,7 @@ import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 
 import {
+    DashboardDto,
     DashboardService,
     GlobalDashboardDto,
     RecentInterventionDto
@@ -37,9 +38,9 @@ import { AlertsWidget } from "./components/alerts-widget";
 ],
     template: `
         <div class="grid grid-cols-12 gap-8">
-            <app-kpis-widget [kpis]="kpis" class="contents" />
+            <app-kpis-widget [kpis]="kpisData()" class="contents" />
             <app-intervention-polar-area class="col-span-12 lg:col-span-8 xl:col-span-8" />
-            <app-alerts-widget class="col-span-12 lg:col-span-4 xl:col-span-4" />
+            <app-alerts-widget [alerts]="alertData()" class="col-span-12 lg:col-span-4 xl:col-span-4" />
             <!-- <div class="col-span-12 xl:col-span-6">
                 <app-recent-sales-widget />
                 <app-best-selling-widget />
@@ -63,37 +64,15 @@ export class DashboardComponent implements OnInit {
     ]
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     private readonly dashboardService = inject(DashboardService);
 
     readonly loading = signal(false);
     readonly dashboard = signal<GlobalDashboardDto | null>(null);
+    readonly dashboardTmp = signal<DashboardDto | null>(null);
     readonly hasError = signal(false);
 
     readonly interventionChartData = computed(() => {
         const data = this.dashboard()?.interventionsParStatut ?? [];
-
         return {
             labels: data.map(x => x.label),
             datasets: [
@@ -138,6 +117,23 @@ export class DashboardComponent implements OnInit {
         }
     };
 
+    kpisData = computed(() => {
+        const kpis = this.dashboardTmp()?.kpis ?? [];
+        return kpis.map(kpi => ({
+            label: kpi.label,
+            value: kpi.value,
+            icon: kpi.icon,
+            color: kpi.color,
+            description: kpi.description,
+            variation: kpi.variation
+        }));
+    });
+
+    alertData = computed(()=>{
+        const alerts = this.dashboardTmp()?.alerts ?? [];
+        return alerts;
+    })
+
     ngOnInit(): void {
         this.loadDashboard();
     }
@@ -155,6 +151,19 @@ export class DashboardComponent implements OnInit {
                 error: error => {
                     console.error('Erreur chargement dashboard global', error);
                     this.dashboard.set(null);
+                    this.hasError.set(true);
+                }
+            });
+
+        this.dashboardService.getTmpDashboard()
+            .pipe(finalize(() => this.loading.set(false)))
+            .subscribe({
+                next: result => {
+                    this.dashboardTmp.set(result);
+                },
+                error: error => {
+                    console.error('Erreur chargement dashboard tmp', error);
+                    this.dashboardTmp.set(null);
                     this.hasError.set(true);
                 }
             });

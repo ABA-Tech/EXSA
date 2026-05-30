@@ -1,3 +1,4 @@
+import { AlertDto } from '@/app/features/services/dashboard.service';
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 
@@ -9,20 +10,14 @@ import { Component, Input } from '@angular/core';
     template: `
         <div class="">
             <ul class="p-0 m-0 list-none">
-                <li class="flex items-center py-2 border-b border-surface">
-                    <div class="w-12 h-12 flex items-center justify-center bg-green-100 dark:bg-green-400/10 rounded-full mr-4 shrink-0">
-                        <i class="pi pi-arrow-up text-xl! text-green-500"></i>
-                    </div>
-                    <span class="text-surface-900 dark:text-surface-0 leading-normal">Your revenue has increased by <span class="text-primary font-bold">%25</span>.</span>
-                </li>
-                <li class="flex items-center py-2 border-b border-surface">
+                <li class="flex items-center py-2 border-b border-surface" *ngFor="let alert of alerts">
                     <div class="w-12 h-12 flex items-center justify-center bg-purple-100 dark:bg-purple-400/10 rounded-full mr-4 shrink-0">
-                        <i class="pi pi-heart text-xl! text-purple-500"></i>
+                        <i [class]="'pi pi-' + alert.icon1 + ' text-purple-500'"></i>
                     </div>
                     <span class="text-surface-900 dark:text-surface-0 leading-normal">
-                        <div><small><i class="pi pi-arrow-up"></i> facturation</small></div>
-                        <span class="text-primary font-bold">12</span>
-                        users have added your products to their wishlist.
+                        <div><small><i [class]="'pi pi-' + alert.icon2"></i> {{ alert.nom }}</small></div>
+                        <span class="text-primary font-bold"> {{ alert.libelle }} </span>
+                        {{ alert.description }}
                     </span>
                 </li>
             </ul>
@@ -31,6 +26,7 @@ import { Component, Input } from '@angular/core';
 })
 export class AlertsWidget {
 
+    @Input() alerts:AlertDto[] = [];
     invoices = [
         {
             category: 'Facturation',

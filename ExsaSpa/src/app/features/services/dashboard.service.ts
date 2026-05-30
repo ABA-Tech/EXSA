@@ -144,6 +144,33 @@ export interface FactureAlerteDto {
     dateEcheance?: string | null;
 }
 
+
+
+// Nouvelle version donc nouveaux modèles
+
+export interface DashboardDto {
+  kpis: KpiDto[];
+  alerts: AlertDto[];
+}
+
+export interface KpiDto {
+  label: string;
+  color: string;
+  value: string;
+  icon: string;
+  variation: string;
+  description: string;
+}
+
+export interface AlertDto {
+  nom: string;
+  libelle: string;
+  description: string;
+  icon1: string;
+  icon2: string;
+}
+
+
 @Injectable({
     providedIn: 'root'
 })
@@ -155,6 +182,12 @@ export class DashboardService {
     getGlobalDashboard(): Observable<GlobalDashboardDto> {
         return this.http.get<GlobalDashboardDto>(
             `${this.baseUrl}/Dashboard/global`
+        );
+    }
+
+    getTmpDashboard(): Observable<DashboardDto> {
+        return this.http.get<DashboardDto>(
+            `${this.baseUrl}/Dashboard/temp`
         );
     }
 }

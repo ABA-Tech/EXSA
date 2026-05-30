@@ -16,7 +16,7 @@ import { Component, Input } from '@angular/core';
                             <div class="text-surface-900 dark:text-surface-0 font-medium text-xl">{{ kpi.value }}</div>
                         </div>
                         <div class="flex items-center justify-center" [class]="['bg-' + kpi.color + '-100', 'dark:bg-' + kpi.color + '-400/10', 'rounded-border']" style="width: 2.5rem; height: 2.5rem">
-                            <i [class]="kpi.icon" [style]="{'color': 'var(--' + kpi.color + '-500)'}" class="text-xl!"></i>
+                            <i [class]="'pi pi-' + kpi.icon" [style]="{'color': 'var(--' + kpi.color + '-500)'}" class="text-xl!"></i>
                         </div>
                     </div>
                     <span class="text-primary font-medium">24 new </span>

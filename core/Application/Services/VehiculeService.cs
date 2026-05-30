@@ -7,10 +7,12 @@ namespace Application.Services;
 public class VehiculeService : IVehiculeService
 {
     private readonly IVehiculeStore _vehiculeStore;
+    private readonly IInterventionStore _InterventionStore;
 
-    public VehiculeService(IVehiculeStore vehiculeStore)
+    public VehiculeService(IVehiculeStore vehiculeStore, IInterventionStore interventionStore)
     {
         _vehiculeStore = vehiculeStore;
+        _InterventionStore = interventionStore;
     }
 
     public async Task<Vehicule?> GetByIdAsync(Guid id)
@@ -20,6 +22,12 @@ public class VehiculeService : IVehiculeService
 
     public async Task<IEnumerable<Vehicule>> GetAllAsync()
     {
+        var interventions = (await _InterventionStore.GetAllAsync()).First();
+        var affect = await _InterventionStore.GetAffectationsAsync(interventions.IdIntervention.Value);
+        interventions.AffectationInterventions = affect.ToList();
+        var doc = new DocumentService(interventions);
+        doc.CreateDocument();
+
         return await _vehiculeStore.GetAllAsync();
     }
 

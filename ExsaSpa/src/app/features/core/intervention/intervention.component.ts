@@ -118,6 +118,11 @@ export class InterventionComponent {
     maxNumStep = signal(3);
     currentNumStep = signal(1);
 
+
+    selectedPhotoIndex = 0;
+
+
+
     constructor(private interventionService: InterventionService,
             private referentielService: ReferentielService,
             private employeService: EmployeService
@@ -547,4 +552,52 @@ export class InterventionComponent {
             })
     }
 
+    dateDiff(date1: Date | any, date2: Date | any): string {
+        const msParJour = 1000 * 60 * 60 * 24;
+
+        if(date1.includes(" ") || date1.includes("T")){
+            var dateStr = date1.includes(" ") ? date1.split(" ")[0].split("/") : (date1.includes("T") ? date1.split("T")[0].split("/") : date1.split("/"));
+            date1 = `${dateStr[2]}-${dateStr[1]}-${dateStr[0]}`;
+            var dateStr2 = date2.includes(" ") ? date2.split(" ")[0].split("/") : (date2.includes("T") ? date2.split("T")[0].split("/") : date2.split("/"));
+            date2 = `${dateStr2[2]}-${dateStr2[1]}-${dateStr2[0]}`;
+        }
+        else if(date1.includes("/") && date2.includes("/")){
+            var dateStr = date1.split("/");
+            date1 = `${dateStr[2]}-${dateStr[1]}-${dateStr[0]}`;
+            var dateStr2 = date2.split("/");
+            date2 = `${dateStr2[2]}-${dateStr2[1]}-${dateStr2[0]}`;
+        }
+
+        let totalJours = Math.round(Math.abs(new Date(date2).getTime() - new Date(date1).getTime()) / msParJour);
+
+        const annees = Math.floor(totalJours / 365);
+        totalJours %= 365;
+        const mois = Math.floor(totalJours / 30);
+        totalJours %= 30;
+        const semaines = Math.floor(totalJours / 7);
+        const jours = totalJours % 7;
+
+        const parts: string[] = [];
+        if (annees)   parts.push(`${annees} an${annees > 1 ? 's' : ''}`);
+        if (mois)     parts.push(`${mois} mois`);
+        if (semaines) parts.push(`${semaines} semaine${semaines > 1 ? 's' : ''}`);
+        if (jours)    parts.push(`${jours} jour${jours > 1 ? 's' : ''}`);
+
+        return parts.length
+            ? parts.slice(0, -1).join(', ') + (parts.length > 1 ? ' et ' : '') + parts.at(-1)!
+            : "Aujourd'hui";
+    }
+
+
+    prevPhoto() {
+    const list = this.photoInterventionList();
+    if (!list.length) return;
+    this.selectedPhotoIndex = (this.selectedPhotoIndex - 1 + list.length) % list.length;
+    }
+
+    nextPhoto() {
+    const list = this.photoInterventionList();
+    if (!list.length) return;
+    this.selectedPhotoIndex = (this.selectedPhotoIndex + 1) % list.length;
+    }
 }

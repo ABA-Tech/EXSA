@@ -161,6 +161,8 @@ namespace Infrastructure.Extensions
                 Type = intervention.TYPE,
                 UrlSignature = intervention.URL_SIGNATURE,
                 StatutIntervention = intervention.STATUTNavigation?.ToModel(),
+                LocataireNavigation = intervention.ID_LOCATAIRENavigation?.ToModel(),
+                AffectationInterventions = intervention.AFFECTATION_INTERVENTIONs?.ToModelCollection().ToList(),
             };
         }
 

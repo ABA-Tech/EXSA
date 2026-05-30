@@ -65,7 +65,7 @@ namespace Infrastructure.Stores
 
         public async Task<IEnumerable<Intervention>> GetAllAsync(string status = null)
         {
-            return (await _dbContext.INTERVENTIONs.Include(x=>x.STATUTNavigation).Where(x=>status == null || x.STATUT == status).ToListAsync()).ToModelCollection();
+            return (await _dbContext.INTERVENTIONs.Include(x=>x.ID_LOCATAIRENavigation).Include(x=>x.STATUTNavigation).Where(x=>status == null || x.STATUT == status).ToListAsync()).ToModelCollection();
         }
 
         public async Task<Intervention> GetByIdAsync(Guid id)
