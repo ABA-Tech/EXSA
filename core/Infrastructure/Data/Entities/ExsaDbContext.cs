@@ -393,6 +393,7 @@ public partial class ExsaDbContext : DbContext
             entity.Property(e => e.ID_LOCAL).HasMaxLength(50);
             entity.Property(e => e.LATITUDE).HasColumnType("decimal(10, 7)");
             entity.Property(e => e.LONGITUDE).HasColumnType("decimal(10, 7)");
+            entity.Property(e => e.MONTANT_CONVENU_XAF).HasColumnType("decimal(15, 2)");
             entity.Property(e => e.NOM_CLIENT).HasMaxLength(200);
             entity.Property(e => e.PRIORITE).HasDefaultValueSql("((2))");
             entity.Property(e => e.REFERENCE).HasMaxLength(30);

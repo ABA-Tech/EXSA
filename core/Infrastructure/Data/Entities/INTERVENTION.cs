@@ -53,6 +53,8 @@ public partial class INTERVENTION
 
     public bool EST_SUPPRIME { get; set; }
 
+    public decimal? MONTANT_CONVENU_XAF { get; set; }
+
     public virtual ICollection<AFFECTATION_INTERVENTION> AFFECTATION_INTERVENTIONs { get; set; } = new List<AFFECTATION_INTERVENTION>();
 
     public virtual ICollection<AFFECTATION_VEHICULE> AFFECTATION_VEHICULEs { get; set; } = new List<AFFECTATION_VEHICULE>();
