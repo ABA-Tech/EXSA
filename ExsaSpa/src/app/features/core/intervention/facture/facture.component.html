@@ -1,0 +1,123 @@
+<div class="invoice-page" style="margin-top: 15px;">
+  <div class="invoice-header">
+    <div>
+      <p-tag value="FACTURE" styleClass="invoice-tag"></p-tag>
+      <h2>{{ facture.reference }}</h2>
+      <p class="subtitle">{{ facture.nomClient }}</p>
+    </div>
+
+    <div class="header-actions">
+      <span class="status-chip" [class.paid]="facture.statut === 'PAYEE'">
+        {{ facture.statut }}
+      </span>
+
+      <button
+        class="btn-add-reglement"
+        (click)="openReglementDialog()"
+        >
+        <span class="pi pi-plus"></span>
+        Ajouter un règlement
+       </button>
+    </div>
+  </div>
+
+  <div class="summary-grid">
+    <div class="summary-card total">
+      <span class="label">Total facture</span>
+      <span class="value">{{ facture.totalXaf | number }} XAF</span>
+    </div>
+
+    <div class="summary-card paid">
+      <span class="label">Déjà réglé</span>
+      <span class="value">{{ totalRegle | number }} XAF</span>
+    </div>
+
+    <div class="summary-card remaining">
+      <span class="label">Reste à payer</span>
+      <span class="value">{{ resteAPayer | number }} XAF</span>
+    </div>
+  </div>
+
+  <div class="progress-block">
+    <div class="progress-head">
+      <span>Avancement du règlement</span>
+      <strong>{{ pourcentageRegle }}%</strong>
+    </div>
+
+    <p-progressBar [value]="pourcentageRegle"></p-progressBar>
+  </div>
+
+  <div class="payments-card">
+    <div class="payments-card-header">
+      <h3>Règlements</h3>
+      <span>{{ reglements.length }} mouvement(s)</span>
+    </div>
+
+    <div class="payment-row" *ngFor="let reglement of reglements">
+      <div>
+        <div class="payment-title">{{ reglement.referenceReglement || 'Sans référence' }}</div>
+        <div class="payment-meta">
+          {{ reglement.modeReglement }} · {{ reglement.dateReglement | date:'dd/MM/yyyy HH:mm' }}
+        </div>
+      </div>
+
+      <div class="payment-amount">
+        {{ reglement.montantXaf | number }} XAF
+      </div>
+
+      <span class="payment-status" [class.confirmed]="reglement.statutReglement === 'CONFIRME'">
+        {{ reglement.statutReglement }}
+      </span>
+    </div>
+  </div>
+</div>
+
+<p-dialog
+  [(visible)]="reglementDialogVisible"
+  header="Ajouter un règlement"
+  [modal]="true"
+  [style]="{ width: '520px' }"
+  [draggable]="false"
+  [resizable]="false"
+>
+  <div class="dialog-content">
+    <div class="field">
+      <label>Montant</label>
+      <input class="native-input" type="number" [(ngModel)]="newReglement.montantXaf" placeholder="Ex: 50000" />
+    </div>
+
+    <div class="field">
+      <label>Mode de règlement</label>
+      <p-select
+        [options]="modesReglement"
+        [(ngModel)]="newReglement.modeReglement"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Choisir un mode"
+        styleClass="native-select"
+      ></p-select>
+    </div>
+
+    <div class="field">
+      <label>Référence</label>
+      <input class="native-input" type="text" [(ngModel)]="newReglement.referenceReglement" placeholder="Ex: REF-001" />
+    </div>
+
+    <div class="field">
+      <label>Date de règlement</label>
+      <p-datepicker
+        [(ngModel)]="newReglement.dateReglement"
+        dateFormat="dd/mm/yy"
+        [showTime]="true"
+        styleClass="native-select"
+      ></p-datepicker>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <button class="btn-cancel" type="button" (click)="reglementDialogVisible = false">Annuler</button>
+    <button class="btn-save" type="button" (click)="saveReglement()">
+      ✓ Enregistrer
+    </button>
+  </ng-template>
+</p-dialog>

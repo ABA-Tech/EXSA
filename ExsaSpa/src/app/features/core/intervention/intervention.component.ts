@@ -30,6 +30,7 @@ import { FileUploadModule } from 'primeng/fileupload';
 import { DataViewModule } from 'primeng/dataview';
 import { FraisTechniciensComponent } from "./frais-techniciens/frais-techniciens.component";
 import { RationTransportGridDto } from '../../models/RationTransportGridDto';
+import { FactureComponent } from "./facture/facture.component";
 
 interface Column {
     field: string;
@@ -78,7 +79,8 @@ interface UploadEvent {
     ChipModule,
     FileUploadModule,
     DataViewModule,
-    FraisTechniciensComponent
+    FraisTechniciensComponent,
+    FactureComponent
 ],
   templateUrl: './intervention.component.html',
   styleUrl: './intervention.component.scss',
@@ -92,6 +94,7 @@ export class InterventionComponent {
     submitted: boolean = false;
     displayDetails: boolean = false;
     displayDepense= signal<boolean>(false);
+    displayFacture= signal<boolean>(false);
     typeInterventionList: any[] = [];
     statutInterventionList: any[] = [];
     typePhotoInterventionList: any[] = [];
@@ -537,6 +540,7 @@ export class InterventionComponent {
         this.intervention = { ...intervention };
         // this.loadGridDepense();
         this.displayDetails = false;
+        this.displayFacture.set(false);
         this.inerventionDialog = false;
         this.getAffectations(this.intervention.idIntervention!);
         setTimeout(() => {
@@ -590,14 +594,29 @@ export class InterventionComponent {
 
 
     prevPhoto() {
-    const list = this.photoInterventionList();
-    if (!list.length) return;
-    this.selectedPhotoIndex = (this.selectedPhotoIndex - 1 + list.length) % list.length;
+        const list = this.photoInterventionList();
+        if (!list.length) return;
+        this.selectedPhotoIndex = (this.selectedPhotoIndex - 1 + list.length) % list.length;
     }
 
     nextPhoto() {
-    const list = this.photoInterventionList();
-    if (!list.length) return;
-    this.selectedPhotoIndex = (this.selectedPhotoIndex + 1) % list.length;
+        const list = this.photoInterventionList();
+        if (!list.length) return;
+        this.selectedPhotoIndex = (this.selectedPhotoIndex + 1) % list.length;
+    }
+
+
+    getFracture(intervention: Intervention) {
+        this.intervention = {}
+        this.displayDepense.set(false);
+        this.displayFacture.set(false);
+        this.intervention = { ...intervention };
+        // this.loadGridDepense();
+        this.displayDetails = false;
+        this.inerventionDialog = false;
+        this.getAffectations(this.intervention.idIntervention!);
+        setTimeout(() => {
+            this.displayFacture.set(true);
+        }, 500);
     }
 }

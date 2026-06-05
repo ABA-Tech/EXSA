@@ -81,6 +81,7 @@
             <td>
                 <p-button icon="pi pi-pencil" class="mr-2" text="Modifier" [rounded]="true" [outlined]="true" (click)="editIntervention(intervention)" />
                 <p-button icon="pi pi-pencil" class="mr-2" text="Dépenses" [rounded]="true" [outlined]="true" (click)="getDepenses(intervention)" />
+                <p-button icon="pi pi-dollar" class="mr-2" text="Facture" [rounded]="true" [outlined]="true" (click)="getFracture(intervention)" />
                 <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (click)="deleteIntervention(intervention)" />
             </td>
         </tr>
@@ -585,4 +586,9 @@
         [techniciens]="affectationList()"
         (refreshIntervention)="getInterventionDetails(intervention)"
     ></app-frais-techniciens>
+}
+@if (intervention && displayFacture()) {
+    <app-facture
+    style="margin-top: 2rem;"
+    ></app-facture>
 }

@@ -1,0 +1,259 @@
+.invoice-page {
+  padding: 1.25rem;
+  background: linear-gradient(180deg, #f6f8fb 0%, #ffffff 100%);
+  border-radius: 16px;
+}
+
+.invoice-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.invoice-header h2 {
+  margin: 0.25rem 0 0.2rem;
+  font-size: 1.25rem;
+  color: #1a1a1a;
+}
+
+.subtitle {
+  margin: 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.status-chip {
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  background: #fdecea;
+  color: #b3261e;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.status-chip.paid {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.summary-card {
+  border-radius: 14px;
+  padding: 1rem;
+  background: #fff;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+
+/**
+* bouton d'ajout de règlement
+*/
+.btn-add-reglement {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 1.1rem;
+  border-radius: 999px;
+  border: none;
+  background: #2e7d32;
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover {
+    background: #1b5e20;
+  }
+
+  .pi {
+    font-size: 0.85rem;
+  }
+} /**/
+
+.summary-card .label {
+  font-size: 0.78rem;
+  color: #777;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.summary-card .value {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.summary-card.total { border-top: 3px solid #4f8cff; }
+.summary-card.paid { border-top: 3px solid #2e7d32; }
+.summary-card.remaining { border-top: 3px solid #f57c00; }
+
+.progress-block,
+.payments-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 1rem;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+  margin-bottom: 1rem;
+}
+
+.progress-head,
+.payments-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.8rem;
+}
+
+.payment-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.9rem 0;
+  border-top: 1px solid #f1f1f1;
+}
+
+.payment-title {
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.payment-meta {
+  font-size: 0.82rem;
+  color: #777;
+}
+
+.payment-amount {
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.payment-status {
+  font-size: 0.78rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: 999px;
+  background: #f3f4f6;
+  color: #666;
+}
+
+.payment-status.confirmed {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.dialog-content {
+  display: grid;
+  gap: 1rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.field label {
+  font-size: 0.85rem;
+  color: #555;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .invoice-header,
+  .header-actions,
+  .progress-head,
+  .payments-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .payment-row {
+    grid-template-columns: 1fr;
+    gap: 0.35rem;
+  }
+}
+
+/**
+*   Code du formulaire d'ajout de règlement
+**/
+.native-input {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: #1a1a1a;
+  background: #fff;
+  outline: none;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+
+  &:focus {
+    border-color: #4f8cff;
+    box-shadow: 0 0 0 3px rgba(79, 140, 255, 0.15);
+  }
+}
+
+// Force p-select et p-datepicker à prendre toute la largeur
+::ng-deep .native-select {
+  width: 100% !important;
+
+  .p-inputtext,
+  .p-select,
+  .p-datepicker-input {
+    width: 100% !important;
+    border-radius: 8px !important;
+    border-color: #d1d5db !important;
+    font-size: 0.9rem !important;
+  }
+}
+
+.btn-cancel {
+  padding: 0.5rem 1.1rem;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  color: #555;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover { background: #f3f4f6; }
+}
+
+.btn-save {
+  padding: 0.5rem 1.1rem;
+  border-radius: 8px;
+  border: none;
+  background: #2e7d32;
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover { background: #1b5e20; }
+}
+/***/
