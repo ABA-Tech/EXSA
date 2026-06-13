@@ -50,13 +50,15 @@ public partial class Intervention
 
     public bool EstSupprime { get; set; }
 
+    public decimal? MontantConvenuXaf { get; set; }
+
     public virtual ICollection<AffectationIntervention>? AffectationInterventions { get; set; } = new List<AffectationIntervention>();
 
     //public virtual ICollection<Facture> Factures { get; set; } = new List<Facture>();
 
     //public virtual Utilisateur IdCreateurNavigation { get; set; } = null!;
 
-    public virtual Locataire LocataireNavigation { get; set; } = null!;
+    public virtual Locataire? LocataireNavigation { get; set; } = null!;
 
     //public virtual Utilisateur? IdValidateurNavigation { get; set; }
 

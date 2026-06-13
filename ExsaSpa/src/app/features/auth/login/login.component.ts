@@ -60,7 +60,7 @@ export class LoginComponent {
       tokenFcm: null
     }).subscribe({
       next: () => {
-        this.router.navigateByUrl('/dashboard');
+        this.router.navigateByUrl('/');
       },
       error: (error: unknown) => {
         this.loading = false;

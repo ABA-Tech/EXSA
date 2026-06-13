@@ -37,24 +37,10 @@ import { MessageService } from 'primeng/api';
 import { CelluleRationTransportDto, JourRationTransportDto, RationTransportGridDto, SousTotalTechnicienDto } from '@/app/features/models/RationTransportGridDto';
 import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
 
-type ExpenseKind = 'ration' | 'transport';
-
-interface DayColumn {
-  key: string;
-  date: Date;
-}
-
 interface ExpenseEntry {
   ration: number | null;
   transport: number | null;
 }
-
-interface Technician {
-  initials: string;
-  name: string;
-  entries: Record<string, ExpenseEntry>;
-}
-
 interface FormDepenseIntervention {
   date: string;
   ration: number | null;
@@ -139,28 +125,6 @@ export class FraisTechniciensComponent {
     saisieCellule$ = new Subject<CelluleRationTransportDto>();
     saisieCelluleTypeDepense:string = "";
 
-//   days: DayColumn[] = [];
-
-//   technicians: Technician[] = [
-//     {
-//       initials: 'AJ',
-//       name: 'Abouna Jean',
-//       entries: {}
-//     },
-//     {
-//       initials: 'MP',
-//       name: 'Mbarga Paul',
-//       entries: {}
-//     },
-//     {
-//       initials: 'NS',
-//       name: 'Ngo Simone',
-//       entries: {}
-//     }
-//   ];
-
-
-
 
     data!: RationTransportGridDto;
 
@@ -176,18 +140,6 @@ export class FraisTechniciensComponent {
             private interventionService: InterventionService,
             private messageService: MessageService
   ) {
-    // this.addDay();
-
-    // const key = this.days[0].key;
-
-    // this.technicians[0].entries[key].ration = 0;
-    // this.technicians[0].entries[key].transport = null;
-
-    // this.technicians[1].entries[key].ration = null;
-    // this.technicians[1].entries[key].transport = 500;
-
-    // this.technicians[2].entries[key].ration = 500;
-    // this.technicians[2].entries[key].transport = null;
   }
 
   ngOnInit() {
@@ -221,97 +173,6 @@ export class FraisTechniciensComponent {
   addDepense() {
     this.isFormulaire = true;
   }
-
-//   addDay(): void {
-//     if (!this.selectedDate) return;
-
-//     const key = this.toKey(this.selectedDate);
-
-//     if (this.days.some(d => d.key === key)) {
-//       return;
-//     }
-
-//     this.days.push({
-//       key,
-//       date: new Date(this.selectedDate)
-//     });
-
-//     this.days.sort((a, b) => a.date.getTime() - b.date.getTime());
-
-//     for (const technician of this.technicians) {
-//       technician.entries[key] ??= {
-//         ration: null,
-//         transport: null
-//       };
-//     }
-//   }
-
-//   removeDay(key: string): void {
-//     this.days = this.days.filter(d => d.key !== key);
-
-//     for (const technician of this.technicians) {
-//       delete technician.entries[key];
-//     }
-//   }
-
-//   totalTechnician(technician: Technician, kind?: ExpenseKind): number {
-//     return Object.values(technician.entries).reduce((sum, entry) => {
-//       if (kind) {
-//         return sum + this.amount(entry[kind]);
-//       }
-
-//       return sum + this.amount(entry.ration) + this.amount(entry.transport);
-//     }, 0);
-//   }
-
-//   totalDay(dayKey: string, kind: ExpenseKind): number {
-//     return this.technicians.reduce((sum, technician) => {
-//       return sum + this.amount(technician.entries[dayKey]?.[kind]);
-//     }, 0);
-//   }
-
-//   totalKind(kind: ExpenseKind): number {
-//     return this.technicians.reduce((sum, technician) => {
-//       return sum + this.totalTechnician(technician, kind);
-//     }, 0);
-//   }
-
-//   grandTotal(): number {
-//     return this.totalKind('ration') + this.totalKind('transport');
-//   }
-
-//   hasData(): boolean {
-//     return this.grandTotal() > 0;
-//   }
-
-//   save(): void {
-//     const payload = this.technicians.map(technician => ({
-//       name: technician.name,
-//       entries: technician.entries
-//     }));
-
-//     console.log('Payload à envoyer API', payload);
-//   }
-
-//   formatXaf(value: number): string {
-//     return `${new Intl.NumberFormat('fr-FR').format(value)} XAF`;
-//   }
-
-//   dayTitle(date: Date): string {
-//     const weekday = new Intl.DateTimeFormat('fr-FR', {
-//       weekday: 'short'
-//     }).format(date).replace('.', '');
-
-//     const day = new Intl.DateTimeFormat('fr-FR', {
-//       day: 'numeric'
-//     }).format(date);
-
-//     const month = new Intl.DateTimeFormat('fr-FR', {
-//       month: 'short'
-//     }).format(date).replace('.', '');
-
-//     return `${this.capitalize(weekday)} ${day}\n${month}`;
-//   }
 
   private amount(value: number | null | undefined): number {
     return value ?? 0;
@@ -372,6 +233,11 @@ export class FraisTechniciensComponent {
             && this.saisieDepense.reference
             && this.saisieDepense.typeDepenseIntervention
         ) {
+            const date = new Date(this.saisieDepense.date);
+            date.setMinutes(
+                date.getMinutes() - date.getTimezoneOffset()
+            );
+            this.saisieDepense.date = date.toISOString().split('T')[0];
             this.saisieDepense.typeDepense = this.saisieDepense.typeDepenseIntervention?.code
             this.saisieDepense.idIntervention = this.intervention().idIntervention;
 
@@ -411,7 +277,7 @@ export class FraisTechniciensComponent {
     }
 
     getSousTotalTech(idEmploye: string): SousTotalTechnicienDto | undefined {
-        return this.sousTotalTechMap.get(idEmploye);
+        return this.grilleDepenses().sousTotauxTechniciens?.find((t) => t.idEmploye === idEmploye);
     }
 
     onSave(): void {
@@ -438,65 +304,6 @@ export class FraisTechniciensComponent {
         }
     }
 
-    private recalculateTotals(): void {
-        if (!this.data) return;
-
-        for (const jour of this.data.jours!) {
-        jour.sousTotalRationsJour = jour.cellules.reduce(
-            (sum, cell) => sum + (cell.montantRation ?? 0),
-            0
-        );
-
-        jour.sousTotalTransportJour = jour.cellules.reduce(
-            (sum, cell) => sum + (cell.montantTransport ?? 0),
-            0
-        );
-
-        jour.sousTotalJour = jour.sousTotalRationsJour + jour.sousTotalTransportJour;
-        }
-
-        for (const tech of this.data.techniciens!) {
-        const cellulesTech = this.data.jours!
-            .flatMap(jour => jour.cellules)
-            .filter(cell => cell.idEmploye === tech.idEmploye);
-
-        let total = this.sousTotalTechMap.get(tech.idEmploye);
-
-        if (!total) {
-            total = {
-            idEmploye: tech.idEmploye,
-            sousTotalRations: 0,
-            sousTotalTransport: 0,
-            sousTotal: 0,
-            nbJoursAvecRation: 0,
-            nbJoursAvecTransport: 0
-            };
-
-            this.data.sousTotauxTechniciens!.push(total);
-            this.sousTotalTechMap.set(tech.idEmploye, total);
-        }
-
-        total.sousTotalRations = cellulesTech.reduce(
-            (sum, cell) => sum + (cell.montantRation ?? 0),
-            0
-        );
-
-        total.sousTotalTransport = cellulesTech.reduce(
-            (sum, cell) => sum + (cell.montantTransport ?? 0),
-            0
-        );
-
-        total.sousTotal = total.sousTotalRations + total.sousTotalTransport;
-
-        total.nbJoursAvecRation = cellulesTech.filter(cell => cell.montantRation !== null).length;
-        total.nbJoursAvecTransport = cellulesTech.filter(cell => cell.montantTransport !== null).length;
-        }
-
-        this.data.grandTotal = this.data.jours!.reduce(
-        (sum, jour) => sum + jour.sousTotalJour,
-        0
-        );
-    }
 
     enregistrerCellule(cell: CelluleRationTransportDto) {
         var pathDepense: PathDepenseInterventionDto = {
@@ -513,7 +320,6 @@ export class FraisTechniciensComponent {
         this.interventionService.PathDepenseIntervention(this.intervention().idIntervention!, pathDepense)
                 .subscribe({
                     next: (res)=>{
-                    console.log(res)
                     if(res) {
                         this.messageService.add({ severity: 'success', summary: 'Succès', detail: 'Enregistré avec succès.' });
                         this.loadGridDepense();

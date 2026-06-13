@@ -1,4 +1,5 @@
 
+
 <p-toolbar styleClass="">
     <ng-template #start>
         <p-button label="New" icon="pi pi-plus" severity="secondary" class="mr-2" (click)="openNew()" />
@@ -79,106 +80,14 @@
             <td>{{ intervention.dateDebut | date }}</td>
 
             <td>
-                <p-button icon="pi pi-pencil" class="mr-2" text="Modifier" [rounded]="true" [outlined]="true" (click)="editIntervention(intervention)" />
-                <p-button icon="pi pi-pencil" class="mr-2" text="Dépenses" [rounded]="true" [outlined]="true" (click)="getDepenses(intervention)" />
-                <p-button icon="pi pi-dollar" class="mr-2" text="Facture" [rounded]="true" [outlined]="true" (click)="getFracture(intervention)" />
+                <p-button icon="pi pi-pencil" text="Modifier" [rounded]="true" [outlined]="true" (click)="editIntervention(intervention)" />
+                <p-button icon="pi pi-pencil" text="Dépenses" [rounded]="true" [outlined]="true" (click)="getDepenses(intervention)" />
+                <p-button icon="pi pi-dollar" text="Facture" [rounded]="true" [outlined]="true" (click)="getFracture(intervention)" />
                 <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (click)="deleteIntervention(intervention)" />
             </td>
         </tr>
     </ng-template>
 </p-table>
-
-<p-dialog [(visible)]="inerventionDialog" [style]="{ width: '750px' }" header="Données de l'intervention" [modal]="true">
-    <ng-template #content>
-        <div class="flex flex-col gap-6">
-            <div class="grid grid-cols-12 gap-4">
-                <div class="col-span-8">
-                    <label for="name" class="block font-bold mb-3">Titre</label>
-                    <input type="text" pInputText id="name" [(ngModel)]="intervention.titre" required autofocus fluid />
-                    <small class="text-red-500" *ngIf="submitted && !intervention.titre">Le titre est requis.</small>
-                </div>
-                <div class="col-span-4">
-                    <label for="type" class="block font-bold mb-3">Type d'intervention</label>
-                    <p-select [(ngModel)]="intervention.type" inputId="type" [options]="typeInterventionList" optionLabel="libelle" optionValue="code" placeholder="Select a Type" fluid />
-                    <small class="text-red-500" *ngIf="submitted && !intervention.type">Le type d'intervention est requis.</small>
-                </div>
-            </div>
-            <div>
-                <label for="description" class="block font-bold">Description</label>
-                <textarea id="description" pTextarea [(ngModel)]="intervention.description" required rows="3" cols="20" fluid></textarea>
-            </div>
-            <p-fieldset legend="Coordonnées" class="mt-0">
-                <div class="grid grid-cols-12 gap-4 mb-3">
-                    <div class="col-span-6">
-                        <label for="reference" class="block font-bold mb-3">Code</label>
-                        <input type="text" pInputText id="reference" [(ngModel)]="intervention.reference" required fluid />
-                        <small class="text-red-500" *ngIf="submitted && !intervention.reference">Le code est requis.</small>
-                    </div>
-                    <div class="col-span-6">
-                        <label for="nomClient" class="block font-bold mb-3">Nom du client</label>
-                        <input type="text" pInputText id="nomClient" [(ngModel)]="intervention.nomClient" value="Eneo" required fluid />
-                        <small class="text-red-500" *ngIf="submitted && !intervention.nomClient">Le nom du client est requis.</small>
-                    </div>
-                </div>
-                <div class="grid grid-cols-12 gap-4">
-                    <div class="col-span-6">
-                        <label for="adresse" class="block font-bold mb-3">Adresse</label>
-                        <input type="text" pInputText id="adresse" [(ngModel)]="intervention.adresse" required fluid />
-                        <small class="text-red-500" *ngIf="submitted && !intervention.adresse">L'adresse est requise.</small>
-                    </div>
-                    <div class="col-span-3">
-                        <label for="latitude" class="block font-bold mb-3">Latitude</label>
-                        <input type="number" pInputText id="latitude" [(ngModel)]="intervention.latitude" required fluid />
-                        <small class="text-red-500" *ngIf="submitted && !intervention.latitude">La latitude est requise.</small>
-                    </div>
-                    <div class="col-span-3">
-                        <label for="longitude" class="block font-bold mb-3">Longitude</label>
-                        <input type="number" pInputText id="longitude" [(ngModel)]="intervention.longitude" required fluid />
-                        <small class="text-red-500" *ngIf="submitted && !intervention.longitude">La longitude est requise.</small>
-                    </div>
-                </div>
-            </p-fieldset>
-
-            <div>
-                <div class="grid grid-cols-12 gap-4">
-                    <div class="col-span-4">
-                        <label for="dateDebut" class="block font-bold mb-3">Date de début</label>
-                        <p-datepicker [showIcon]="true" [showButtonBar]="false" [(ngModel)]="intervention.dateDebut" dateFormat="dd/mm/yy"></p-datepicker>
-                        <small class="text-red-500" *ngIf="submitted && !intervention.dateDebut">La date de début est requise.</small>
-                    </div>
-                    <div class="col-span-4">
-                        <label for="dateFin" class="block font-bold mb-3">Date de fin</label>
-                        <p-datepicker [showIcon]="true" [showButtonBar]="false" [(ngModel)]="intervention.dateFin" dateFormat="dd/mm/yy"></p-datepicker>
-                        <small class="text-red-500" *ngIf="submitted && !intervention.dateFin">La date de fin est requise.</small>
-                    </div>
-                    <div class="col-span-4">
-                        <label for="datePlanifiee" class="block font-bold mb-3">Date planifiée</label>
-                        <p-datepicker [showIcon]="true" [showButtonBar]="false" [(ngModel)]="intervention.datePlanifiee" dateFormat="dd/mm/yy"></p-datepicker>
-                        <small class="text-red-500" *ngIf="submitted && !intervention.datePlanifiee">La date planifiée est requise.</small>
-                    </div>
-                </div>
-            </div>
-            <hr class="my-0" />
-            <div class="grid grid-cols-12 gap-4">
-                <div class="col-span-4">
-                    <label for="notes" class="block font-bold mb-3">Noter l'intervention</label>
-                    <input type="text" min="0" max="5" pInputText id="notes" [(ngModel)]="intervention.notes" required fluid />
-                </div>
-            </div>
-            <div>
-                <label for="dateValidation" class="block font-bold mb-3">Date de validation</label>
-                <p-datepicker [showIcon]="true" [showButtonBar]="false" [(ngModel)]="intervention.dateValidation" dateFormat="dd/mm/yy"></p-datepicker>
-                <small class="text-red-500" *ngIf="submitted && !intervention.dateValidation">La date de validation est requise.</small>
-            </div>
-        </div>
-    </ng-template>
-
-    <ng-template #footer>
-        <p-button label="Fermer" icon="pi pi-times" text (click)="hideDialog()" />
-        <p-button label="Enregistrer" icon="pi pi-check" (click)="saveIntervention()" />
-    </ng-template>
-</p-dialog>
-
 
 <p-confirmdialog [style]="{ width: '450px' }" />
 
@@ -193,7 +102,7 @@
             </p-step-list>
             <p-step-panels>
                 <p-step-panel [value]="1">
-                    <ng-template #content let-activateCallback="activateCallback">
+<ng-template #content let-activateCallback="activateCallback">
                        <p-fieldset legend="Informations générales" class="mt-0">
                             <div class="grid grid-cols-12 gap-4">
                                 <div class="col-span-8">
@@ -250,17 +159,17 @@
                                 <div class="grid grid-cols-12 gap-4">
                                     <div class="col-span-4">
                                         <label for="dateDebut2" class="block font-bold mb-3">Date de début</label>
-                                        <p-datepicker [showIcon]="true" [showButtonBar]="false" [(ngModel)]="intervention.dateDebut" dateFormat="dd/mm/yy"></p-datepicker>
+                                        <p-datepicker [showIcon]="true" [showButtonBar]="false" [(ngModel)]="intervention.dateDebut"  dateFormat="yy-mm-dd"></p-datepicker>
                                         <small class="text-red-500" *ngIf="submitted && !intervention.dateDebut">La date de début est requise.</small>
                                     </div>
                                     <div class="col-span-4">
                                         <label for="dateFin2" class="block font-bold mb-3">Date de fin</label>
-                                        <p-datepicker [showIcon]="true" [showButtonBar]="false" [(ngModel)]="intervention.dateFin" dateFormat="dd/mm/yy"></p-datepicker>
+                                        <p-datepicker [showIcon]="true" [showButtonBar]="false" [(ngModel)]="intervention.dateFin"  dateFormat="yy-mm-dd"></p-datepicker>
                                         <small class="text-red-500" *ngIf="submitted && !intervention.dateFin">La date de fin est requise.</small>
                                     </div>
                                     <div class="col-span-4">
                                         <label for="datePlanifiee2" class="block font-bold mb-3">Date planifiée</label>
-                                        <p-datepicker [showIcon]="true" [showButtonBar]="false" [(ngModel)]="intervention.datePlanifiee" dateFormat="dd/mm/yy"></p-datepicker>
+                                        <p-datepicker [showIcon]="true" [showButtonBar]="false" [(ngModel)]="intervention.datePlanifiee"  dateFormat="yy-mm-dd"></p-datepicker>
                                         <small class="text-red-500" *ngIf="submitted && !intervention.datePlanifiee">La date planifiée est requise.</small>
                                     </div>
                                 </div>
@@ -274,10 +183,25 @@
                             </div>
                             <div>
                                 <label for="dateValidation2" class="block font-bold mb-3">Date de validation</label>
-                                <p-datepicker [showIcon]="true" [showButtonBar]="false" [(ngModel)]="intervention.dateValidation" dateFormat="dd/mm/yy"></p-datepicker>
+                                <p-datepicker [showIcon]="true" [showButtonBar]="false" [(ngModel)]="intervention.dateValidation"  dateFormat="yy-mm-dd"></p-datepicker>
                                 <small class="text-red-500" *ngIf="submitted && !intervention.dateValidation">La date de validation est requise.</small>
                             </div>
                         </p-fieldset>
+
+                        <!-- AJOUT : SECTION FACTURATION COMPLÉTÉE -->
+                        <p-fieldset legend="Facturation" class="mt-0 section-billing">
+
+
+                            <div class="billing-fields">
+                                <div class="grid grid-cols-12 gap-4">
+                                    <div class="col-span-6">
+                                        <label for="montantHT" class="block font-bold mb-3">Montant HT convenu (XAF)</label>
+                                        <input type="number" pInputText id="montantHT" [(ngModel)]="intervention.montantConvenuXaf" placeholder="Ex: 500000" fluid />
+                                    </div>
+                                </div>
+                            </div>
+                        </p-fieldset>
+
                         <div class="flex pt-6 justify-end">
                             <p-button label="Valider la saisie" icon="pi pi-arrow-right" iconPos="right" (onClick)="etapeSaisie(1)" />
                         </div>
@@ -323,7 +247,7 @@
                         </div>
 
                         <div class="flex pt-6 justify-between">
-                            <p-button label="Retourner en saisie" severity="secondary" icon="pi pi-arrow-left" (onClick)="etapeSaisie(-1)" />
+                            <p-button label="Retourner en saisie" severity="secondary" icon="pi pi-arrow-left" (onClick)="etapeAfectation(-1)" />
                             <p-button label="Valider les affectations" icon="pi pi-arrow-right" iconPos="right" (onClick)="etapeAfectation(1)" />
                         </div>
                     </ng-template>
@@ -462,7 +386,7 @@
 
                             </div>
                         <div class="flex pt-6 justify-between">
-                            <!-- <p-button label="Précédent" severity="secondary" icon="pi pi-arrow-left" (onClick)="etapeDemarrage(-1, 'EN_COURS')" /> -->
+                            <p-button label="Précédent" severity="secondary" icon="pi pi-arrow-left" (onClick)="etapeDemarrage(-1, 'EN_COURS')" />
                             <p-button label="Valider" icon="pi pi-arrow-right" iconPos="right" (onClick)="etapeDemarrage(1, 'VALIDEE')" />
                         </div>
                     </ng-template>
@@ -551,7 +475,7 @@
                                 </button>
                                 </div>
 
-                                <div class="photo-preview" *ngIf="photoInterventionList()?.length">
+                                <div class="photo-preview" *ngIf="photoInterventionList().length">
                                 <div class="preview-frame">
                                     <img
                                     [src]="photoInterventionList()[selectedPhotoIndex || 0]?.urlBlob"
@@ -569,7 +493,7 @@
 
                         </div>
                         <div class="flex pt-6 justify-between">
-                            <!-- <p-button label="Précédent" severity="secondary" icon="pi pi-arrow-left" (onClick)="etapeDemarrage(-1, 'VALIDEE')" /> -->
+                            <p-button label="Précédent" severity="secondary" icon="pi pi-arrow-left" (onClick)="etapeDemarrage(-1, 'VALIDEE')" />
                             <p-button label="Valider la clôture" icon="pi pi-arrow-right" iconPos="right" (onClick)="etapeDemarrage(1, 'CLOTUREE')" />
                         </div>
                     </ng-template>
@@ -578,6 +502,14 @@
         </p-stepper>
     </div>
 }
+
+<app-create-intervention
+    [interventionDialog]="inerventionDialog()"
+    [intervention]="intervention"
+    [typeInterventionList]="typeInterventionList"
+    (evtFermeture)="onInterventionDialogClose($event)"
+    (interventionDialogChange)="onInterventionDialogClose($event)"
+></app-create-intervention>
 
 @if (intervention && displayDepense() && affectationList().length > 0) {
 
@@ -589,6 +521,7 @@
 }
 @if (intervention && displayFacture()) {
     <app-facture
+        [intervention]="intervention"
     style="margin-top: 2rem;"
     ></app-facture>
 }

@@ -31,6 +31,7 @@ import { DataViewModule } from 'primeng/dataview';
 import { FraisTechniciensComponent } from "./frais-techniciens/frais-techniciens.component";
 import { RationTransportGridDto } from '../../models/RationTransportGridDto';
 import { FactureComponent } from "./facture/facture.component";
+import { CreateIntervention } from "./create-intervention/create-intervention";
 
 interface Column {
     field: string;
@@ -80,7 +81,8 @@ interface UploadEvent {
     FileUploadModule,
     DataViewModule,
     FraisTechniciensComponent,
-    FactureComponent
+    FactureComponent,
+    CreateIntervention
 ],
   templateUrl: './intervention.component.html',
   styleUrl: './intervention.component.scss',
@@ -89,8 +91,8 @@ interface UploadEvent {
 export class InterventionComponent {
 
     interventionList = signal<Intervention[]>([]);
-    inerventionDialog: boolean = false;
-    intervention!: Intervention;
+    inerventionDialog = signal<boolean>(false);
+    intervention: Intervention = {};
     submitted: boolean = false;
     displayDetails: boolean = false;
     displayDepense= signal<boolean>(false);
@@ -193,49 +195,19 @@ export class InterventionComponent {
 
      editIntervention(intervention: Intervention) {
         this.intervention = { ...intervention };
-        this.intervention.dateDebut = new Date(intervention.dateDebut!).toLocaleDateString('fr-FR');
-        this.intervention.dateFin = new Date(intervention.dateFin!).toLocaleDateString('fr-FR');
-        this.intervention.datePlanifiee = new Date(intervention.datePlanifiee!).toLocaleDateString('fr-FR');
-        this.intervention.dateValidation = new Date(intervention.dateValidation!).toLocaleDateString('fr-FR');
 
-        this.inerventionDialog = true;
+        this.intervention.dateDebut = intervention.dateDebut?.includes("T") ? intervention.dateDebut?.toString().split("T")[0] : intervention.dateDebut;
+        this.intervention.dateFin = intervention.dateFin?.includes("T") ? intervention.dateFin?.toString().split("T")[0] : intervention.dateFin;
+        this.intervention.datePlanifiee = intervention.datePlanifiee?.includes("T") ? intervention.datePlanifiee?.toString().split("T")[0] : intervention.datePlanifiee;
+        this.intervention.dateValidation = intervention.dateValidation?.includes("T") ? intervention.dateValidation?.toString().split("T")[0] : intervention.dateValidation;
+        console.log(this.intervention.dateDebut)
+        this.inerventionDialog.set(true);
     }
 
-    saveIntervention() {
-        this.submitted = true;
-        if (this.intervention.idIntervention) {
-            this.intervention.dateDebut = this.splitDate(this.intervention.dateDebut as string);
-            this.intervention.dateFin = this.splitDate(this.intervention.dateFin as string);
-            this.intervention.datePlanifiee = this.splitDate(this.intervention.datePlanifiee as string);
-            this.intervention.dateValidation = this.splitDate(this.intervention.dateValidation as string);
-
-            this.interventionService.update(this.intervention.idIntervention, this.intervention).subscribe({
-                next: (data) => {
-                    this.inerventionDialog = false;
-                    this.loadData();
-                },
-                error: (err) => {
-                    console.error('Error updating intervention:', err);
-                }
-            });
-        }
-        else {
-            this.intervention.statut = 'CREEE';
-            this.interventionService.create(this.intervention).subscribe({
-                next: (data) => {
-                    this.inerventionDialog = false;
-                    this.loadData();
-                },
-                error: (err) => {
-                    console.error('Error creating intervention:', err);
-                }
-            });
-        }
-    }
 
 
     showDialog() {
-        this.inerventionDialog = true;
+        this.inerventionDialog.set(true);
     }
 
     onGlobalFilter(table: Table, event: Event) {
@@ -245,7 +217,7 @@ export class InterventionComponent {
     openNew() {
         this.intervention = {};
         this.submitted = false;
-        this.inerventionDialog = true;
+        this.inerventionDialog.set(true);
     }
 
     exportCSV() {
@@ -276,7 +248,7 @@ export class InterventionComponent {
      deleteIntervention(intervention: Intervention) {
         this.intervention = { ...intervention };
 
-        this.inerventionDialog = true;
+        this.inerventionDialog.set(true);
     }
 
     getStatus(status: string) {
@@ -291,7 +263,7 @@ export class InterventionComponent {
     }
 
     hideDialog() {
-        this.inerventionDialog = false;
+        this.inerventionDialog.set(false);
         this.submitted = false;
     }
 
@@ -328,10 +300,15 @@ export class InterventionComponent {
         this.displayDetails = true;
         this.displayDepense.set(false);
         this.intervention = { ...intervention };
-        this.intervention.dateDebut = new Date(intervention.dateDebut!).toLocaleDateString('fr-FR');
-        this.intervention.dateFin = new Date(intervention.dateFin!).toLocaleDateString('fr-FR');
-        this.intervention.datePlanifiee = new Date(intervention.datePlanifiee!).toLocaleDateString('fr-FR');
-        this.intervention.dateValidation = new Date(intervention.dateValidation!).toLocaleDateString('fr-FR');
+
+        this.intervention.dateDebut = intervention.dateDebut?.includes("T") ? intervention.dateDebut?.toString().split("T")[0] : intervention.dateDebut;
+        this.intervention.dateFin = intervention.dateFin?.includes("T") ? intervention.dateFin?.toString().split("T")[0] : intervention.dateFin;
+        this.intervention.datePlanifiee = intervention.datePlanifiee?.includes("T") ? intervention.datePlanifiee?.toString().split("T")[0] : intervention.datePlanifiee;
+        this.intervention.dateValidation = intervention.dateValidation?.includes("T") ? intervention.dateValidation?.toString().split("T")[0] : intervention.dateValidation;
+        // this.intervention.dateDebut = new Date(intervention.dateDebut!).toLocaleDateString('fr-FR');
+        // this.intervention.dateFin = new Date(intervention.dateFin!).toLocaleDateString('fr-FR');
+        // this.intervention.datePlanifiee = new Date(intervention.datePlanifiee!).toLocaleDateString('fr-FR');
+        // this.intervention.dateValidation = new Date(intervention.dateValidation!).toLocaleDateString('fr-FR');
         this.currentNumStep.set(intervention.statutIntervention ? intervention.statutIntervention.ordre : 1);
 
         this.employeService.getAll().subscribe({
@@ -382,10 +359,10 @@ export class InterventionComponent {
         if(move> 0) {
             this.submitted = true;
             if (this.intervention.idIntervention) {
-                this.intervention.dateDebut = this.formatDate(this.intervention.dateDebut);
-                this.intervention.dateFin = this.formatDate(this.intervention.dateFin);
-                this.intervention.datePlanifiee = this.formatDate(this.intervention.datePlanifiee);
-                this.intervention.dateValidation = this.formatDate(this.intervention.dateValidation);
+                // this.intervention.dateDebut = this.formatDate(this.intervention.dateDebut);
+                // this.intervention.dateFin = this.formatDate(this.intervention.dateFin);
+                // this.intervention.datePlanifiee = this.formatDate(this.intervention.datePlanifiee);
+                // this.intervention.dateValidation = this.formatDate(this.intervention.dateValidation);
 
                 // return;
                 this.interventionService.update(this.intervention.idIntervention, this.intervention).subscribe({
@@ -436,7 +413,10 @@ export class InterventionComponent {
             this.intervention.statut = 'EN_COURS';
             this.updateStatutIntervention();
         }
-
+        else {
+            this.intervention.statut = 'AFFECTATION';
+            this.updateStatutIntervention();
+        }
         this.currentNumStep.set(this.currentNumStep() + move);
     }
 
@@ -541,7 +521,7 @@ export class InterventionComponent {
         // this.loadGridDepense();
         this.displayDetails = false;
         this.displayFacture.set(false);
-        this.inerventionDialog = false;
+        this.inerventionDialog.set(false);
         this.getAffectations(this.intervention.idIntervention!);
         setTimeout(() => {
             this.displayDepense.set(true);
@@ -613,10 +593,18 @@ export class InterventionComponent {
         this.intervention = { ...intervention };
         // this.loadGridDepense();
         this.displayDetails = false;
-        this.inerventionDialog = false;
+        this.inerventionDialog.set(false);
         this.getAffectations(this.intervention.idIntervention!);
         setTimeout(() => {
             this.displayFacture.set(true);
         }, 500);
+    }
+
+
+    onInterventionDialogClose(loadData: boolean) {
+        this.inerventionDialog.set(false);
+        if(loadData) {
+            this.loadData();
+        }
     }
 }

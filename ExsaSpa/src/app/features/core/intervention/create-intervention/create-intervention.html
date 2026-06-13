@@ -1,0 +1,170 @@
+<p-dialog
+  [visible]="interventionDialog()"
+  (visibleChange)="interventionDialogChange.emit($event)"
+    [style]="{ width: '780px' }"
+    [modal]="true"
+    [draggable]="false"
+    [resizable]="false"
+    styleClass="intervention-dialog"
+>
+    <!-- HEADER NATIF OPTIMISÉ -->
+    <ng-template pTemplate="header">
+        <div class="dialog-header">
+            <div class="dialog-header-icon">
+                <i class="pi pi-bolt"></i>
+            </div>
+            <div>
+                <div class="dialog-header-title">
+                    {{ intervention.idIntervention ? 'Modifier l\'intervention' : 'Nouvelle intervention' }}
+                </div>
+                <div class="dialog-header-sub">
+                    {{ intervention.idIntervention ? intervention.reference : 'Remplissez les informations ci-dessous' }}
+                </div>
+            </div>
+        </div>
+    </ng-template>
+
+    <!-- CONTENU -->
+    <div class="dialog-body">
+
+        <!-- SECTION 1 : Général -->
+        <div class="form-section">
+            <div class="form-section-label">
+                <span class="section-num">01</span>
+                <span>Informations générales</span>
+            </div>
+            <div class="form-grid">
+                <div class="field field-wide">
+                    <label>Titre <span class="required">*</span></label>
+                    <input type="text" pInputText [(ngModel)]="intervention.titre" placeholder="Ex: Remplacement transformateur HT" class="w-full" />
+                    <small class="error" *ngIf="submitted && !intervention.titre">Le titre est requis.</small>
+                </div>
+                <div class="field field-wide">
+                    <label>Type <span class="required">*</span></label>
+                    <p-select
+                        [(ngModel)]="intervention.type"
+                        [options]="typeInterventionList"
+                        optionLabel="libelle"
+                        optionValue="code"
+                        placeholder="Choisir un type"
+                        class="w-full"
+                    />
+                    <small class="error" *ngIf="submitted && !intervention.type">Le type est requis.</small>
+                </div>
+                <div class="field field-full">
+                    <label>Description</label>
+                    <textarea pTextarea [(ngModel)]="intervention.description" rows="3" placeholder="Décrivez les travaux à effectuer..." class="w-full"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 2 : Client & Lieu -->
+        <div class="form-section">
+            <div class="form-section-label">
+                <span class="section-num">02</span>
+                <span>Client & Lieu</span>
+            </div>
+            <div class="form-grid">
+                <div class="field">
+                    <label>Code intervention <span class="required">*</span></label>
+                    <input type="text" pInputText [(ngModel)]="intervention.reference" placeholder="Ex: INT-2026-001" class="w-full" />
+                    <small class="error" *ngIf="submitted && !intervention.reference">Le code est requis.</small>
+                </div>
+                <div class="field">
+                    <label>Nom du client <span class="required">*</span></label>
+                    <input type="text" pInputText [(ngModel)]="intervention.nomClient" placeholder="Ex: Eneo Cameroun" class="w-full" />
+                    <small class="error" *ngIf="submitted && !intervention.nomClient">Le nom du client est requis.</small>
+                </div>
+                <div class="field field-wide">
+                    <label>Adresse</label>
+                    <input type="text" pInputText [(ngModel)]="intervention.adresse" placeholder="Ex: Quartier Bastos, Yaoundé" class="w-full" />
+                </div>
+                <div class="field field-half">
+                    <label>Latitude</label>
+                    <input type="number" pInputText [(ngModel)]="intervention.latitude" placeholder="3.8480" class="w-full" />
+                </div>
+                <div class="field field-half">
+                    <label>Longitude</label>
+                    <input type="number" pInputText [(ngModel)]="intervention.longitude" placeholder="11.5021" class="w-full" />
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 3 : Planning -->
+        <div class="form-section">
+            <div class="form-section-label">
+                <span class="section-num">03</span>
+                <span>Planning</span>
+            </div>
+            <div class="form-grid grid-3">
+                <div class="field">
+                    <label>Date de début</label>
+                    <p-datepicker [showIcon]="true" [(ngModel)]="intervention.dateDebut" dateFormat="yy-mm-dd" class="w-full" />
+                </div>
+                <div class="field">
+                    <label>Date de fin</label>
+                    <p-datepicker [showIcon]="true" [(ngModel)]="intervention.dateFin" dateFormat="yy-mm-dd" class="w-full" />
+                </div>
+                <div class="field">
+                    <label>Date planifiée</label>
+                    <p-datepicker [showIcon]="true" [(ngModel)]="intervention.datePlanifiee" dateFormat="yy-mm-dd" class="w-full" />
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 4 : Facturation -->
+        <div class="form-section section-billing">
+            <div class="form-section-label">
+                <span class="section-num">04</span>
+                <span>Facturation</span>
+                <span class="section-badge">Optionnel</span>
+            </div>
+
+            <div class="billing-toggle" (click)="avecMontantConvenu = !avecMontantConvenu">
+                <p-toggleswitch [(ngModel)]="avecMontantConvenu" (click)="$event.stopPropagation()" />
+                <span class="toggle-label">
+                    Montant convenu à l'avance
+                    <small>Une facture sera générée automatiquement</small>
+                </span>
+            </div>
+
+            <div class="billing-fields" *ngIf="avecMontantConvenu">
+                <div class="form-grid">
+                    <div class="field field-wide">
+                        <label>Montant HT convenu (XAF) <span class="required">*</span></label>
+                        <input type="number" pInputText [(ngModel)]="intervention.montantConvenuXaf" placeholder="Ex: 500000" class="w-full" />
+                    </div>
+                    <div class="field field-half">
+                        <label>TVA</label>
+                        <input type="text" pInputText value="19.25 %" disabled class="w-full readonly-input" />
+                    </div>
+                    <div class="field field-half">
+                        <label>Total TTC estimé</label>
+                        <input type="text" pInputText [value]="getTotalTTC() | number" disabled class="w-full readonly-input" />
+                    </div>
+                </div>
+                <div class="billing-info">
+                    <i class="pi pi-info-circle"></i>
+                    <div>
+                        La facture sera créée avec le statut <strong>EMISE</strong> et liée à cette intervention.
+                        Vous pourrez enregistrer les règlements depuis la fiche de facturation.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- FOOTER NATIF OPTIMISÉ -->
+    <ng-template pTemplate="footer">
+        <div class="dialog-footer">
+            <button class="btn-cancel" type="button" (click)="hideDialog()">
+                <i class="pi pi-times"></i> Annuler
+            </button>
+            <button class="btn-save" type="button" (click)="saveIntervention()">
+                <i class="pi pi-check"></i>
+                {{ intervention.idIntervention ? 'Mettre à jour' : 'Créer l\'intervention' }}
+            </button>
+        </div>
+    </ng-template>
+</p-dialog>

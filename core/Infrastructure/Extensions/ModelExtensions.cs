@@ -160,6 +160,7 @@ namespace Infrastructure.Extensions
                 Titre = intervention.TITRE,
                 Type = intervention.TYPE,
                 UrlSignature = intervention.URL_SIGNATURE,
+                MontantConvenuXaf = intervention.MONTANT_CONVENU_XAF,
                 StatutIntervention = intervention.STATUTNavigation?.ToModel(),
                 LocataireNavigation = intervention.ID_LOCATAIRENavigation?.ToModel(),
                 AffectationInterventions = intervention.AFFECTATION_INTERVENTIONs?.ToModelCollection().ToList(),
@@ -193,7 +194,8 @@ namespace Infrastructure.Extensions
                 STATUT = intervention.Statut,
                 TITRE = intervention.Titre,
                 TYPE = intervention.Type,
-                URL_SIGNATURE = intervention.UrlSignature
+                URL_SIGNATURE = intervention.UrlSignature,
+                MONTANT_CONVENU_XAF = intervention.MontantConvenuXaf
             };
         }
 
@@ -521,6 +523,117 @@ namespace Infrastructure.Extensions
         public static IEnumerable<EntretienVehicule> ToModelCollection(this IEnumerable<ENTRETIEN_VEHICULE> entities)
         {
             return entities.Select(e => e.ToModel());
+        }
+
+        public static Facture ToModel(this FACTURE entity)
+        {
+            return new Facture
+            {
+                IdFacture = entity.ID_FACTURE,
+                IdLocataire = entity.ID_LOCATAIRE,
+                IdIntervention = entity.ID_INTERVENTION,
+                Reference = entity.REFERENCE,
+                Statut = entity.STATUT,
+                NomClient = entity.NOM_CLIENT,
+                SousTotalXaf = entity.SOUS_TOTAL_XAF,
+                TauxTva = entity.TAUX_TVA,
+                TotalXaf = entity.TOTAL_XAF,
+                DateEcheance = entity.DATE_ECHEANCE,
+                DatePaiement = entity.DATE_PAIEMENT,
+                UrlPdf = entity.URL_PDF,
+                DateCreation = entity.DATE_CREATION,
+                DateModification = entity.DATE_MODIFICATION,
+            };
+        }
+
+        // Avec les collections incluses (lignes + règlements)
+        public static Facture ToModelWithDetails(this FACTURE entity)
+        {
+            var model = entity.ToModel();
+            model.LigneFactures = entity.LIGNE_FACTUREs?.Select(l => l.ToModel()).ToList() ?? new List<LigneFacture>();
+            model.Reglements = entity.REGLEMENTs?.Select(r => r.ToModel()).ToList() ?? new List<Reglement>();
+            return model;
+        }
+
+        public static FACTURE ToEntity(this Facture model)
+        {
+            return new FACTURE
+            {
+                ID_FACTURE = model.IdFacture,
+                ID_LOCATAIRE = model.IdLocataire,
+                ID_INTERVENTION = model.IdIntervention,
+                REFERENCE = model.Reference,
+                STATUT = model.Statut,
+                NOM_CLIENT = model.NomClient,
+                SOUS_TOTAL_XAF = model.SousTotalXaf,
+                TAUX_TVA = model.TauxTva,
+                TOTAL_XAF = model.TotalXaf,
+                DATE_ECHEANCE = model.DateEcheance,
+                DATE_PAIEMENT = model.DatePaiement,
+                URL_PDF = model.UrlPdf,
+                DATE_CREATION = model.DateCreation,
+                DATE_MODIFICATION = model.DateModification,
+            };
+        }
+
+        // --- LIGNE FACTURE ---
+
+        public static LigneFacture ToModel(this LIGNE_FACTURE entity)
+        {
+            return new LigneFacture
+            {
+                IdLigne = entity.ID_LIGNE,
+                IdFacture = entity.ID_FACTURE,
+                Description = entity.DESCRIPTION,
+                Quantite = entity.QUANTITE,
+                PrixUnitaire = entity.PRIX_UNITAIRE,
+                TotalXaf = entity.TOTAL_XAF,
+            };
+        }
+
+        public static LIGNE_FACTURE ToEntity(this LigneFacture model)
+        {
+            return new LIGNE_FACTURE
+            {
+                ID_LIGNE = model.IdLigne,
+                ID_FACTURE = model.IdFacture,
+                DESCRIPTION = model.Description,
+                QUANTITE = model.Quantite,
+                PRIX_UNITAIRE = model.PrixUnitaire,
+                TOTAL_XAF = model.TotalXaf,
+            };
+        }
+
+        // --- REGLEMENT ---
+
+        public static Reglement ToModel(this REGLEMENT entity)
+        {
+            return new Reglement
+            {
+                IdReglement = entity.ID_REGLEMENT,
+                IdFacture = entity.ID_FACTURE,
+                MontantXaf = entity.MONTANT_XAF,
+                ModeReglement = entity.MODE_REGLEMENT,
+                ReferenceReglement = entity.REFERENCE_REGLEMENT,
+                DateReglement = entity.DATE_REGLEMENT,
+                DateCreation = entity.DATE_CREATION,
+                DateModification = entity.DATE_MODIFICATION,
+            };
+        }
+
+        public static REGLEMENT ToEntity(this Reglement model)
+        {
+            return new REGLEMENT
+            {
+                ID_REGLEMENT = model.IdReglement,
+                ID_FACTURE = model.IdFacture,
+                MONTANT_XAF = model.MontantXaf,
+                MODE_REGLEMENT = model.ModeReglement,
+                REFERENCE_REGLEMENT = model.ReferenceReglement,
+                DATE_REGLEMENT = model.DateReglement,
+                DATE_CREATION = model.DateCreation,
+                DATE_MODIFICATION = model.DateModification,
+            };
         }
     }
 }

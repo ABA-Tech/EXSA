@@ -230,7 +230,7 @@
                     </div>
                     <div class="flex flex-wrap gap-2 w-full">
                         <label class=" mb-2font-bold block" for="date">Date</label>
-                        <p-datepicker class="w-full" [(ngModel)]="saisieDepense.date"></p-datepicker>
+                        <p-datepicker class="w-full" [(ngModel)]="saisieDepense.date" dateFormat="yy-mm-dd" [showTime]="false"></p-datepicker>
                         <small class="text-red-500" *ngIf="submitted && !saisieDepense.date">Vous devez renseigner une date</small>
                     </div>
                 </div>
@@ -382,11 +382,11 @@
 
             <ng-container *ngIf="getSousTotalTech(tech.idEmploye) as total">
                 <div class="tech-total-line ration-total">
-                {{ total.sousTotalRations | number:'1.0-0' }}
+                {{ total.sousTotalRations | number:'1.0-0' }} XAF
                 </div>
 
                 <div class="tech-total-line transport-total">
-                {{ total.sousTotalTransport | number:'1.0-0' }}
+                {{ total.sousTotalTransport | number:'1.0-0' }} XAF
                 </div>
             </ng-container>
             </td>

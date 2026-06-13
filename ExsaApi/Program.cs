@@ -37,8 +37,11 @@ builder.Services.AddScoped<IAppService<Utilisateur>, AppService<Utilisateur>>();
 builder.Services.AddScoped<IReferentielService, ReferentielService>();
 builder.Services.AddScoped<IArticleStockService, ArticleStockService>();
 builder.Services.AddScoped<IMouvementStockService, MouvementStockService>();
+builder.Services.AddScoped<IFactureService, FactureService>();
 
 // Injection des dépendances de stores
+builder.Services.AddScoped<IRepository<Facture>, FactureStore>();
+builder.Services.AddScoped<IFactureStore, FactureStore>();
 builder.Services.AddScoped<IRepository<Intervention>, InterventionStore>();
 builder.Services.AddScoped<IRepository<Utilisateur>, UtilisateurStore>();
 builder.Services.AddScoped<ILocataireStore, LocataireStore>();

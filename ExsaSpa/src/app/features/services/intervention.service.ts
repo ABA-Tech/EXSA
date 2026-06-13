@@ -5,6 +5,7 @@ import { Utilisateur } from "./employe.service";
 import { RationTransportGridDto } from "../models/RationTransportGridDto";
 
 export interface Intervention {
+  montantConvenuXaf?: number;
   idIntervention?: string;
   idLocal?: string;
   idLocataire?: string;

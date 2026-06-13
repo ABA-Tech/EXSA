@@ -44,11 +44,67 @@ namespace Infrastructure.Stores
 
         public async Task<Intervention> CreateAsync(Intervention model)
         {
-            var entity = model.ToEntity();
-            _dbContext.INTERVENTIONs.Add(entity);
-            await _dbContext.SaveChangesAsync();
+            using var transaction = await _dbContext.Database.BeginTransactionAsync();
+            try
+            {
+                // 1. Créer l'intervention
+                var entity = model.ToEntity();
+                _dbContext.INTERVENTIONs.Add(entity);
+                await _dbContext.SaveChangesAsync();
 
-            return entity.ToModel();
+                // 2. Si un montant convenu est fourni, créer la facture + ligne automatiquement
+                if (model.MontantConvenuXaf.HasValue && model.MontantConvenuXaf > 0)
+                {
+                    var tauxTva = 19.25m;
+                    var sousTotalXaf = model.MontantConvenuXaf.Value;
+                    var totalXaf = Math.Round(sousTotalXaf * (1 + tauxTva / 100), 2);
+
+                    // Générer la référence FAC-YYYY-NNN
+                    var annee = DateTime.Now.Year;
+                    var count = await _dbContext.FACTUREs
+                        .Where(f => f.ID_LOCATAIRE == model.IdLocataire && f.DATE_CREATION.Year == annee)
+                        .CountAsync();
+                    var reference = $"FAC-{annee}-{(count + 1):D3}";
+
+                    var facture = new FACTURE
+                    {
+                        ID_FACTURE = Guid.NewGuid(),
+                        ID_LOCATAIRE = model.IdLocataire,
+                        ID_INTERVENTION = entity.ID_INTERVENTION,
+                        REFERENCE = reference,
+                        NOM_CLIENT = model.NomClient ?? string.Empty,
+                        STATUT = "BROUILLON",
+                        SOUS_TOTAL_XAF = sousTotalXaf,
+                        TAUX_TVA = tauxTva,
+                        TOTAL_XAF = totalXaf,
+                        DATE_CREATION = DateTime.Now,
+                        DATE_MODIFICATION = DateTime.Now,
+                    };
+
+                    _dbContext.FACTUREs.Add(facture);
+
+                    //var ligneFacture = new LIGNE_FACTURE
+                    //{
+                    //    ID_LIGNE = Guid.NewGuid(),
+                    //    ID_FACTURE = facture.ID_FACTURE,
+                    //    DESCRIPTION = model.Titre,
+                    //    QUANTITE = 1,
+                    //    PRIX_UNITAIRE = sousTotalXaf,
+                    //    TOTAL_XAF = sousTotalXaf,
+                    //};
+
+                    //_dbContext.LIGNE_FACTUREs.Add(ligneFacture);
+                    await _dbContext.SaveChangesAsync();
+                }
+
+                await transaction.CommitAsync();
+                return entity.ToModel();
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
 
         public async Task DeleteAsync(Intervention model)
@@ -78,6 +134,64 @@ namespace Infrastructure.Stores
             var entity = model.ToEntity();
             _dbContext.Update(entity);
             await _dbContext.SaveChangesAsync();
+
+            // Modification de la facture
+            var facture = _dbContext.FACTUREs.FirstOrDefault(x => x.ID_INTERVENTION == model.IdIntervention);
+            if (facture != null && model.MontantConvenuXaf.HasValue)
+            {
+
+                var tauxTva = 19.25m;
+                var sousTotalXaf = model.MontantConvenuXaf.Value;
+                var totalXaf = Math.Round(sousTotalXaf * (1 + tauxTva / 100), 2);
+
+                facture.NOM_CLIENT = model.NomClient ?? string.Empty;
+                facture.TOTAL_XAF = totalXaf;
+                facture.SOUS_TOTAL_XAF = sousTotalXaf;
+            }
+            else if(model.MontantConvenuXaf.HasValue && model.MontantConvenuXaf > 0)
+            {
+                // 2. Si un montant convenu est fourni, créer la facture + ligne automatiquement
+                var tauxTva = 19.25m;
+                var sousTotalXaf = model.MontantConvenuXaf.Value;
+                var totalXaf = Math.Round(sousTotalXaf * (1 + tauxTva / 100), 2);
+
+                // Générer la référence FAC-YYYY-NNN
+                var annee = DateTime.Now.Year;
+                var count = await _dbContext.FACTUREs
+                    .Where(f => f.ID_LOCATAIRE == model.IdLocataire && f.DATE_CREATION.Year == annee)
+                    .CountAsync();
+                var reference = $"FAC-{annee}-{(count + 1):D3}";
+
+                var factureNew = new FACTURE
+                {
+                    ID_FACTURE = Guid.NewGuid(),
+                    ID_LOCATAIRE = model.IdLocataire,
+                    ID_INTERVENTION = entity.ID_INTERVENTION,
+                    REFERENCE = reference,
+                    NOM_CLIENT = model.NomClient ?? string.Empty,
+                    STATUT = "BROUILLON",
+                    SOUS_TOTAL_XAF = sousTotalXaf,
+                    TAUX_TVA = tauxTva,
+                    TOTAL_XAF = totalXaf,
+                    DATE_CREATION = DateTime.Now,
+                    DATE_MODIFICATION = DateTime.Now                        
+                };
+
+                _dbContext.FACTUREs.Add(factureNew);
+
+                //var ligneFacture = new LIGNE_FACTURE
+                //{
+                //    ID_LIGNE = Guid.NewGuid(),
+                //    ID_FACTURE = factureNew.ID_FACTURE,
+                //    DESCRIPTION = model.Titre,
+                //    QUANTITE = 1,
+                //    PRIX_UNITAIRE = sousTotalXaf,
+                //    TOTAL_XAF = sousTotalXaf,
+                //};
+
+                //_dbContext.LIGNE_FACTUREs.Add(ligneFacture);
+                await _dbContext.SaveChangesAsync();
+            }
 
             return entity.ToModel();
         }
@@ -138,7 +252,7 @@ namespace Infrastructure.Stores
 
             var ligneExists = await _dbContext.DEPENSE_INTERVENTIONs
                         .Where(x => (x.ID_EMPLOYE == employe.ID_EMPLOYE && x.TYPE_DEPENSE == saisieDepenseIntervention.TypeDepense && x.DATE_DEPENSE == saisieDepenseIntervention.DateDepense)
-                                || (x.REFERENCE == saisieDepenseIntervention.Reference && saisieDepenseIntervention.TypeDepense == x.TYPE_DEPENSE && x.ID_EMPLOYE == employe.ID_EMPLOYE))
+                                || (x.REFERENCE == saisieDepenseIntervention.Reference && saisieDepenseIntervention.TypeDepense == x.TYPE_DEPENSE && x.ID_EMPLOYE == employe.ID_EMPLOYE && x.DATE_DEPENSE == saisieDepenseIntervention.DateDepense))
                         .ToListAsync();
             if (ligneExists.Any())
                 throw new ApplicationException("une saisie similaire existe déjà");

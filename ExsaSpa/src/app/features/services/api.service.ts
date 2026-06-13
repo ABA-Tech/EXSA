@@ -26,7 +26,7 @@ export abstract class ApiService<T> {
         return this.httpClient.post<T>(`${this.baseUrl}/${this.endpoint}`, data);
     }
 
-    update(id: number | string, data: T): Observable<T> {
+    update(id: number | string | any, data: T): Observable<T> {
         return this.httpClient.put<T>(`${this.baseUrl}/${this.endpoint}/${id}`, data);
     }
 

@@ -65,28 +65,7 @@
 /**
 * bouton d'ajout de règlement
 */
-.btn-add-reglement {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.55rem 1.1rem;
-  border-radius: 999px;
-  border: none;
-  background: #2e7d32;
-  color: #fff;
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
-
-  &:hover {
-    background: #1b5e20;
-  }
-
-  .pi {
-    font-size: 0.85rem;
-  }
-} /**/
+/**/
 
 .summary-card .label {
   font-size: 0.78rem;

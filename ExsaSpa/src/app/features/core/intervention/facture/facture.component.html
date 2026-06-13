@@ -2,29 +2,30 @@
   <div class="invoice-header">
     <div>
       <p-tag value="FACTURE" styleClass="invoice-tag"></p-tag>
-      <h2>{{ facture.reference }}</h2>
-      <p class="subtitle">{{ facture.nomClient }}</p>
+      <h2>{{ invoice().reference }}</h2>
+      <p class="subtitle">{{ invoice().nomClient }}</p>
     </div>
 
     <div class="header-actions">
-      <span class="status-chip" [class.paid]="facture.statut === 'PAYEE'">
-        {{ facture.statut }}
+      <span class="status-chip" [class.paid]="invoice().statut === 'PAYEE'">
+        {{ invoice().statut }}
       </span>
 
-      <button
+      <p-button
         class="btn-add-reglement"
         (click)="openReglementDialog()"
+        [disabled]="resteAPayer === 0"
         >
         <span class="pi pi-plus"></span>
         Ajouter un règlement
-       </button>
+       </p-button>
     </div>
   </div>
 
   <div class="summary-grid">
     <div class="summary-card total">
       <span class="label">Total facture</span>
-      <span class="value">{{ facture.totalXaf | number }} XAF</span>
+      <span class="value">{{ invoice().sousTotalXaf | number }} XAF</span>
     </div>
 
     <div class="summary-card paid">
@@ -50,10 +51,10 @@
   <div class="payments-card">
     <div class="payments-card-header">
       <h3>Règlements</h3>
-      <span>{{ reglements.length }} mouvement(s)</span>
+      <span>{{ reglementsFacture().length }} mouvement(s)</span>
     </div>
 
-    <div class="payment-row" *ngFor="let reglement of reglements">
+    <div class="payment-row" *ngFor="let reglement of reglementsFacture()">
       <div>
         <div class="payment-title">{{ reglement.referenceReglement || 'Sans référence' }}</div>
         <div class="payment-meta">
@@ -65,8 +66,8 @@
         {{ reglement.montantXaf | number }} XAF
       </div>
 
-      <span class="payment-status" [class.confirmed]="reglement.statutReglement === 'CONFIRME'">
-        {{ reglement.statutReglement }}
+      <span class="payment-status" [class.confirmed]="'CONFIRME' === 'CONFIRME'">
+        CONFIRME
       </span>
     </div>
   </div>
@@ -107,7 +108,7 @@
       <label>Date de règlement</label>
       <p-datepicker
         [(ngModel)]="newReglement.dateReglement"
-        dateFormat="dd/mm/yy"
+        dateFormat="yy-mm-dd"
         [showTime]="true"
         styleClass="native-select"
       ></p-datepicker>
